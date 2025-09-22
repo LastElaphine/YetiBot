@@ -1,7 +1,10 @@
-import { Client } from "discord";
+import { Client, Events, GatewayIntentBits } from "discord";
+import config from "./config.json" with { type: "json" };
 
-export function add(a: number, b: number): number {
-  return a + b;
-}
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-console.log("Add 2 + 3 =", add(2, 3));
+client.once(Events.ClientReady, (readyClient) => {
+	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
+
+client.login(config.token);
