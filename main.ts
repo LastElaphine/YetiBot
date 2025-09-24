@@ -5,7 +5,13 @@ import config from "./config.json" with { type: "json" };
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 const commands = await loadCommands();
-console.log(`Loaded Commands: ${JSON.stringify(commands, null, 2)}`);
+console.log(
+	`Loaded Commands: ${JSON.stringify(
+		commands.map((value: Command) => value.data),
+		null,
+		2,
+	)}`,
+);
 
 client.once(Events.ClientReady, (readyClient) => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
