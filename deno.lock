@@ -5,8 +5,10 @@
     "jsr:@std/internal@^1.0.10": "1.0.10",
     "npm:@biomejs/biome@*": "2.2.4",
     "npm:@biomejs/biome@^2.2.4": "2.2.4",
+    "npm:@types/node@*": "24.2.0",
     "npm:discord.js@14.22.1": "14.22.1",
-    "npm:discord.js@^14.22.1": "14.22.1"
+    "npm:discord.js@^14.22.1": "14.22.1",
+    "npm:lowdb@*": "7.0.1"
   },
   "jsr": {
     "@std/assert@1.0.14": {
@@ -187,8 +189,17 @@
     "lodash@4.17.21": {
       "integrity": "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
     },
+    "lowdb@7.0.1": {
+      "integrity": "sha512-neJAj8GwF0e8EpycYIDFqEPcx9Qz4GUho20jWFR7YiFeXzF1YMLdxB36PypcTSPMA+4+LvgyMacYhlr18Zlymw==",
+      "dependencies": [
+        "steno"
+      ]
+    },
     "magic-bytes.js@1.12.1": {
       "integrity": "sha512-ThQLOhN86ZkJ7qemtVRGYM+gRgR8GEXNli9H/PMvpnZsE44Xfh3wx9kGJaldg314v85m+bFW6WBMaVHJc/c3zA=="
+    },
+    "steno@4.0.2": {
+      "integrity": "sha512-yhPIQXjrlt1xv7dyPQg2P17URmXbuM5pdGkpiMB3RenprfiBlvK415Lctfe0eshk90oA7/tNq7WEiMK8RSP39A=="
     },
     "ts-mixer@6.0.4": {
       "integrity": "sha512-ufKpbmrugz5Aou4wcr5Wc1UUFWOLhq+Fm6qa6P0w0K5Qw2yhaUoiWszhCVuNQyNwrlGiscHOmqYoAox1PtvgjA=="
@@ -210,7 +221,8 @@
     "dependencies": [
       "jsr:@std/assert@1",
       "npm:@biomejs/biome@^2.2.4",
-      "npm:discord.js@^14.22.1"
+      "npm:discord.js@^14.22.1",
+      "npm:lowdb@^7.0.1"
     ]
   }
 }
