@@ -314,6 +314,28 @@ class DatabaseManager {
 		return this.db;
 	}
 
+	async loadData(): Promise<DatabaseSchema | null> {
+		await this.db.read();
+		return this.db.data || null;
+	}
+
+	async saveGameState(
+		guildId: string,
+		gameState: Partial<GuildGameState>,
+	): Promise<void> {
+		await this.updateGameState(guildId, gameState);
+	}
+
+	async saveLeaderboard(
+		guildId: string,
+		category: string,
+		userId: string,
+		username: string,
+		score: number,
+	): Promise<void> {
+		await this.updateLeaderboard(guildId, category, userId, username, score);
+	}
+
 	private async safeWrite(): Promise<void> {
 		try {
 			await this.db.write();
