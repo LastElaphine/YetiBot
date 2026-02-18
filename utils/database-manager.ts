@@ -45,7 +45,7 @@ class DatabaseManager {
 
 		if (!this.db.data) {
 			this.db.data = this.getDefaultSchema();
-			await this.db.write();
+			await this.safeWrite();
 		}
 
 		await this.runMigrations();
@@ -54,14 +54,18 @@ class DatabaseManager {
 
 	// Guild operations
 	async getGuildData(guildId: string): Promise<GuildDatabase | null> {
-		const guildData = this.db.data!.guilds.get(guildId);
+		const guildData = this.db.data?.guilds.get(guildId);
 		return guildData || null;
 	}
 
 	async createGuildData(
 		guildId: string,
-		guildName?: string,
+		_guildName?: string,
 	): Promise<GuildDatabase> {
+		if (!this.db.data) {
+			throw new Error("Database not initialized");
+		}
+
 		const guildData: GuildDatabase = {
 			guildId,
 			users: new Map(),
@@ -97,11 +101,11 @@ class DatabaseManager {
 			},
 		};
 
-		this.db.data!.guilds.set(guildId, guildData);
-		this.db.data!.globalMetadata.totalGuilds++;
-		this.db.data!.globalMetadata.updatedAt = new Date();
+		this.db.data.guilds.set(guildId, guildData);
+		this.db.data.globalMetadata.totalGuilds++;
+		this.db.data.globalMetadata.updatedAt = new Date();
 
-		await this.db.write();
+		await this.safeWrite();
 		return guildData;
 	}
 
@@ -109,15 +113,19 @@ class DatabaseManager {
 		guildId: string,
 		updates: Partial<GuildDatabase>,
 	): Promise<void> {
-		const guildData = this.db.data!.guilds.get(guildId);
+		if (!this.db.data) {
+			throw new Error("Database not initialized");
+		}
+
+		const guildData = this.db.data.guilds.get(guildId);
 		if (!guildData) {
 			throw new Error(`Guild ${guildId} not found`);
 		}
 
 		Object.assign(guildData, updates, { updatedAt: new Date() });
-		this.db.data!.globalMetadata.updatedAt = new Date();
+		this.db.data.globalMetadata.updatedAt = new Date();
 
-		await this.db.write();
+		await this.safeWrite();
 	}
 
 	// User operations
@@ -142,11 +150,21 @@ class DatabaseManager {
 		let userProfile = guildData.users.get(userId);
 
 		if (!userProfile) {
-			// Get Discord user data
-			const discordUser = await this.client.users.fetch(userId);
+			if (!this.db.data) {
+				throw new Error("Database not initialized");
+			}
+
+			let username = "Unknown";
+			try {
+				const discordUser = await this.client.users.fetch(userId);
+				username = discordUser.username;
+			} catch {
+				console.warn(`Could not fetch user ${userId}, using fallback username`);
+			}
+
 			userProfile = {
 				id: userId,
-				username: discordUser.username,
+				username,
 				guildId,
 				joinedAt: new Date(),
 				lastSeen: new Date(),
@@ -166,16 +184,16 @@ class DatabaseManager {
 			};
 
 			guildData.metadata.totalUsers++;
-			this.db.data!.globalMetadata.totalUsers++;
+			this.db.data.globalMetadata.totalUsers++;
 		} else {
 			Object.assign(userProfile, updates, { updatedAt: new Date() });
 		}
 
 		guildData.users.set(userId, userProfile);
 		guildData.metadata.lastActivity = new Date();
-		this.db.data!.globalMetadata.updatedAt = new Date();
+		this.db.data.globalMetadata.updatedAt = new Date();
 
-		await this.db.write();
+		await this.safeWrite();
 		return userProfile;
 	}
 
@@ -222,7 +240,7 @@ class DatabaseManager {
 		// Recalculate ranks
 		await this.recalculateLeaderboardRanks(guildId, category);
 
-		await this.db.write();
+		await this.safeWrite();
 	}
 
 	async getLeaderboard(
@@ -241,7 +259,7 @@ class DatabaseManager {
 		guildId: string,
 		category: string,
 	): Promise<void> {
-		const guildData = this.db.data!.guilds.get(guildId);
+		const guildData = this.db.data?.guilds.get(guildId);
 		if (!guildData || !guildData.leaderboards[category]) return;
 
 		const sortedEntries = Array.from(
@@ -268,9 +286,10 @@ class DatabaseManager {
 		const data = await Deno.readTextFile("data/db.json");
 		await Deno.writeTextFile(backupPath, data);
 
-		// Store backup timestamp in metadata
-		this.db.data!.globalMetadata.lastBackup = new Date();
-		await this.db.write();
+		if (this.db.data) {
+			this.db.data.globalMetadata.lastBackup = new Date();
+			await this.safeWrite();
+		}
 
 		return backupPath;
 	}
@@ -294,6 +313,15 @@ class DatabaseManager {
 	// Getter for external access (for AmuletUtil, etc.)
 	getLowInstance(): Low<DatabaseSchema> {
 		return this.db;
+	}
+
+	private async safeWrite(): Promise<void> {
+		try {
+			await this.db.write();
+		} catch (error) {
+			console.error("Failed to write to database:", error);
+			throw error;
+		}
 	}
 }
 

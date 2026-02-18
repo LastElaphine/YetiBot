@@ -36,7 +36,7 @@ export class ChannelHelper {
 	public async sendToChannel(channelId: string, content: string) {
 		const channel = await this.getChannel(channelId);
 
-		if (channel && channel.isSendable()) {
+		if (channel?.isSendable()) {
 			try {
 				await channel.send(content);
 			} catch (error) {

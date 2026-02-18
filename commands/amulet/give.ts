@@ -36,7 +36,15 @@ class Give extends Command {
 			return;
 		}
 
-		const guildId = interaction.guildId!;
+		if (!interaction.guildId) {
+			await interaction.reply({
+				content: "This command can only be used in a server.",
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
+		const guildId = interaction.guildId;
 		const channelId = interaction.channelId;
 
 		// Show immediate feedback

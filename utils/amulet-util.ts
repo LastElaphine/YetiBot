@@ -1,5 +1,5 @@
 import { clearTimeout, setTimeout } from "node:timers";
-import type { User } from "discord";
+import type { Client, User } from "discord";
 import type { UserProfile } from "../types/database.ts";
 import { ChannelHelper } from "./channel-helper.ts";
 import { DatabaseManager } from "./database-manager.ts";
@@ -7,15 +7,20 @@ import { DatabaseManager } from "./database-manager.ts";
 class AmuletUtil {
 	private static instance: AmuletUtil;
 	private dbManager: DatabaseManager;
-	private timeouts: Map<string, number> = new Map(); // guildId -> timeoutId
+	private client: Client;
+	private timeouts: Map<string, number> = new Map();
 
-	private constructor(dbManager: DatabaseManager) {
+	private constructor(dbManager: DatabaseManager, client: Client) {
 		this.dbManager = dbManager;
+		this.client = client;
 	}
 
-	public static getInstance(dbManager: DatabaseManager): AmuletUtil {
+	public static getInstance(
+		dbManager: DatabaseManager,
+		client: Client,
+	): AmuletUtil {
 		if (!AmuletUtil.instance) {
-			AmuletUtil.instance = new AmuletUtil(dbManager);
+			AmuletUtil.instance = new AmuletUtil(dbManager, client);
 		}
 		return AmuletUtil.instance;
 	}
@@ -50,7 +55,7 @@ class AmuletUtil {
 
 			await this.dbManager.updateGameState(guildId, {
 				amulet: {
-					...gameState!.amulet,
+					...gameState?.amulet,
 					currentHolder: user.id,
 					channelId,
 					lastTransferred: new Date(),
@@ -144,8 +149,7 @@ class AmuletUtil {
 
 			this.timeouts.delete(guildId);
 
-			// Notify channel about timeout
-			await ChannelHelper.getInstance((globalThis as any).client).sendToChannel(
+			await ChannelHelper.getInstance(this.client).sendToChannel(
 				channelId,
 				`${userProfile.displayName || userProfile.username} has lost the amulet! It's now available for anyone to claim.`,
 			);
@@ -167,8 +171,11 @@ class AmuletUtil {
 
 let amuletUtil: AmuletUtil;
 
-export const initializeAmuletUtil = (client: any) => {
-	amuletUtil = AmuletUtil.getInstance(DatabaseManager.getInstance(client));
+export const initializeAmuletUtil = (client: Client) => {
+	amuletUtil = AmuletUtil.getInstance(
+		DatabaseManager.getInstance(client),
+		client,
+	);
 };
 
 export { AmuletUtil, amuletUtil };

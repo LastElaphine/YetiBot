@@ -32,14 +32,14 @@ export class AtomicJSONFile<T> implements Adapter<T> {
 		}
 	}
 
-	private mapReplacer(key: string, value: any): any {
+	private mapReplacer(_key: string, value: unknown): unknown {
 		if (value instanceof Map) {
 			return { _type: "Map", _value: Array.from(value.entries()) };
 		}
 		return value;
 	}
 
-	private reviveMaps(obj: any): any {
+	private reviveMaps(obj: unknown): unknown {
 		if (obj && typeof obj === "object") {
 			if (obj._type === "Map") {
 				return new Map(obj._value);
