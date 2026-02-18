@@ -14,13 +14,14 @@ bd sync               # Sync with git
 
 ## Build, Lint, and Test Commands
 
-All commands run from the project root (`/home/zesty/Documents/YetiBot`). This project uses **mise** for tool management.
+All commands run from the project root. This project uses **mise** for tool management.
 
 ### Development
 
 ```bash
 mise run dev              # Run bot with hot reload (--watch)
 mise run deploy-commands  # Deploy slash commands to test server
+mise exec -- deno run --allow-all main.ts
 ```
 
 ### Linting & Formatting
@@ -28,15 +29,8 @@ mise run deploy-commands  # Deploy slash commands to test server
 ```bash
 mise run lint             # Run Biome check (lint + imports + formatting)
 mise run lint:fix         # Run Biome check and auto-fix issues
-```
-
-### Running Specific Files
-
-```bash
-mise exec -- deno run --allow-all main.ts                           # Run bot
-mise exec -- deno run --allow-all deploy-commands.ts                 # Deploy commands
-mise exec -- deno run -A npm:@biomejs/biome check <path>             # Lint specific file
-mise exec -- deno run -A npm:@biomejs/biome check --write <path>     # Fix specific file
+mise exec -- deno run -A npm:@biomejs/biome check <path>    # Lint file
+mise exec -- deno run -A npm:@biomejs/biome check --write <path>  # Fix file
 ```
 
 ### Required Permissions
@@ -49,24 +43,22 @@ mise exec -- deno run -A npm:@biomejs/biome check --write <path>     # Fix speci
 
 ### Imports
 
-- Use Deno native imports where possible (`@std/*`, `jsr:*`)
-- Use npm: prefix for Node.js packages when needed
-- Group imports: stdlib → external → relative
-- Example:
+- Use Deno native imports (`@std/*`, `jsr:*`) where possible
+- Use npm: prefix for Node.js packages
+- Group: stdlib → external → relative
   ```typescript
   import { readdir } from "node:fs/promises";
-  import path from "node:path";
   import { Collection, type CommandInteraction } from "discord";
   import { Command } from "../../command.ts";
   ```
 
-### Formatting
+### Formatting (Biome)
 
-- Biome handles formatting automatically (run `deno task lint-fix`)
-- Use tab indentation (2 spaces per tab)
+- Tab indentation (2 spaces per tab)
 - Double quotes for strings
 - Trailing commas in multi-line objects/arrays
 - Semicolons required
+- Run `mise run lint:fix` to auto-format
 
 ### Types
 
@@ -74,22 +66,23 @@ mise exec -- deno run -A npm:@biomejs/biome check --write <path>     # Fix speci
 - Explicit return types on public functions
 - Avoid `any` - use `unknown` or proper generics
 - Use `interface` for object shapes, `type` for unions/primitives
-- Prefix abstract class properties with `public abstract`
 
 ### Naming Conventions
 
-- **Classes**: PascalCase (`class Ping extends Command`)
-- **Variables/Functions**: camelCase (`const userId`, `function giveAmulet()`)
-- **Constants**: SCREAMING_SNAKE_CASE for values, camelCase for config objects
-- **Files**: kebab-case (`channel-helper.ts`, `amulet-util.ts`)
-- **Commands**: Folder-based structure under `commands/<category>/<name>.ts`
+| Type | Convention | Example |
+|------|------------|---------|
+| Classes | PascalCase | `class Ping extends Command` |
+| Variables/Functions | camelCase | `const userId`, `function giveAmulet()` |
+| Constants | SCREAMING_SNAKE_CASE | `const MAX_COUNT = 10` |
+| Files | kebab-case | `channel-helper.ts` |
+| Commands | Folder-based | `commands/<category>/<name>.ts` |
 
 ### Error Handling
 
 - Use `try/catch` for async operations
 - Log errors with `console.error()`
 - Return `null` or sensible defaults on failure
-- Always handle Discord interaction replies with `ephemeral` flag for errors:
+- Use `ephemeral` flag for error messages:
   ```typescript
   await interaction.reply({
     content: "Error message",
@@ -97,24 +90,21 @@ mise exec -- deno run -A npm:@biomejs/biome check --write <path>     # Fix speci
   });
   ```
 
-### Project Structure
+## Project Structure
 
 ```
 YetiBot/
 ├── main.ts                 # Bot entry point, event handlers
 ├── command.ts              # Command base class + loader
 ├── deploy-commands.ts      # Slash command registration
-├── commands/
-│   ├── <category>/
-│   │   └── <command>.ts    # Implement SlashCommandBuilder + Command
-├── utils/
-│   └── <name>-util.ts      # Singleton utility classes
-├── deno.json               # Tasks, imports, permissions
-├── biome.json              # Linter configuration
-└── AGENTS.md               # This file
+├── commands/<category>/<name>.ts  # Slash commands
+├── utils/<name>-util.ts     # Singleton utilities
+├── deno.json                # Tasks, imports
+├── biome.json               # Linter/formatter config
+└── AGENTS.md                # This file
 ```
 
-### Command Implementation Pattern
+## Command Implementation Pattern
 
 ```typescript
 import { type CommandInteraction, SlashCommandBuilder } from "discord";
@@ -125,12 +115,10 @@ class <Name> extends Command {
     return new SlashCommandBuilder()
       .setName("command-name")
       .setDescription("Description here")
-      .addOption(/* options as needed */);
+      .addOption(/* options */);
   }
 
-  public override async execute(
-    interaction: CommandInteraction,
-  ): Promise<void> {
+  public override async execute(interaction: CommandInteraction): Promise<void> {
     await interaction.reply("response");
   }
 }
@@ -140,102 +128,27 @@ export const command = new <Name>();
 
 ### Singleton Pattern for Utilities
 
-- Use private static `instance` field
+- Private static `instance` field
 - Private constructor
 - Public static `getInstance()` method
 - Export single instance: `export { utilityName }`
 
 ### Discord Best Practices
 
-- Always check `interaction.isChatInputCommand()` before handling
+- Check `interaction.isChatInputCommand()` before handling
 - Handle null checks for optional fields (`interaction.member`, `interaction.options.getUser()`)
-- Use `MessageFlags.Ephemeral` for error messages and sensitive data
+- Use `MessageFlags.Ephemeral` for errors and sensitive data
 
-## Landing the Plane (Session Completion)
+## Session Completion (MANDATORY)
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
+1. Run quality gates: `mise run lint`
+2. Update issue status: `bd close <id>`
+3. Sync and push:
    ```bash
    git pull --rebase
    bd sync
    git push
-   git status  # MUST show "up to date with origin"
+   git status  # Must show "up to date with origin"
    ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
 
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-
-<!-- bv-agent-instructions-v1 -->
-
----
-
-## Beads Workflow Integration
-
-This project uses [beads_viewer](https://github.com/Dicklesworthstone/beads_viewer) for issue tracking. Issues are stored in `.beads/` and tracked in git.
-
-### Essential Commands
-
-```bash
-# View issues (launches TUI - avoid in automated sessions)
-bv
-
-# CLI commands for agents (use these instead)
-bd ready              # Show issues ready to work (no blockers)
-bd list --status=open # All open issues
-bd show <id>          # Full issue details with dependencies
-bd create --title="..." --type=task --priority=2
-bd update <id> --status=in_progress
-bd close <id> --reason="Completed"
-bd close <id1> <id2>  # Close multiple issues at once
-bd sync               # Commit and push changes
-```
-
-### Workflow Pattern
-
-1. **Start**: Run `bd ready` to find actionable work
-2. **Claim**: Use `bd update <id> --status=in_progress`
-3. **Work**: Implement the task
-4. **Complete**: Use `bd close <id>`
-5. **Sync**: Always run `bd sync` at session end
-
-### Key Concepts
-
-- **Dependencies**: Issues can block other issues. `bd ready` shows only unblocked work.
-- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog (use numbers, not words)
-- **Types**: task, bug, feature, epic, question, docs
-- **Blocking**: `bd dep add <issue> <depends-on>` to add dependencies
-
-### Session Protocol
-
-**Before ending any session, run this checklist:**
-
-```bash
-git status              # Check what changed
-git add <files>         # Stage code changes
-bd sync                 # Commit beads changes
-git commit -m "..."     # Commit code
-bd sync                 # Commit any new beads changes
-git push                # Push to remote
-```
-
-### Best Practices
-
-- Check `bd ready` at session start to find available work
-- Update status as you work (in_progress → closed)
-- Create new issues with `bd create` when you discover tasks
-- Use descriptive titles and set appropriate priority/type
-- Always `bd sync` before ending session
-
-<!-- end-bv-agent-instructions -->
+**CRITICAL**: Work is NOT complete until `git push` succeeds.
