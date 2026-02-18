@@ -8,6 +8,7 @@ import type {
 	UserProfile,
 } from "../types/database.ts";
 import { AtomicJSONFile } from "./atomic-json-adapter.ts";
+import { ensureDirectories, paths } from "./path-config.ts";
 
 class DatabaseManager {
 	private static instance: DatabaseManager;
@@ -16,7 +17,7 @@ class DatabaseManager {
 
 	private constructor(client: Client) {
 		this.client = client;
-		const adapter = new AtomicJSONFile<DatabaseSchema>("data/db.json");
+		const adapter = new AtomicJSONFile<DatabaseSchema>(paths.dbFile);
 		this.db = new Low(adapter, this.getDefaultSchema());
 	}
 
@@ -278,12 +279,11 @@ class DatabaseManager {
 	// Utility operations
 	async createBackup(): Promise<string> {
 		const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-		const backupDir = "data/backups";
-		const backupPath = `${backupDir}/backup-${timestamp}.json`;
+		const backupPath = `${paths.backupDir}/backup-${timestamp}.json`;
 
-		await Deno.mkdir(backupDir, { recursive: true });
+		await ensureDirectories();
 
-		const data = await Deno.readTextFile("data/db.json");
+		const data = await Deno.readTextFile(paths.dbFile);
 		await Deno.writeTextFile(backupPath, data);
 
 		if (this.db.data) {
@@ -300,8 +300,7 @@ class DatabaseManager {
 	}
 
 	private async ensureDataDirectory(): Promise<void> {
-		await Deno.mkdir("data", { recursive: true });
-		await Deno.mkdir("data/backups", { recursive: true });
+		await ensureDirectories();
 	}
 
 	// Cleanup operations
