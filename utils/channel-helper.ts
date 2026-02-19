@@ -9,7 +9,7 @@ export class ChannelHelper {
 	}
 
 	public static getInstance(client: Client): ChannelHelper {
-		if (ChannelHelper.instance === null) {
+		if (!ChannelHelper.instance) {
 			ChannelHelper.instance = new ChannelHelper(client);
 		}
 		return ChannelHelper.instance;

@@ -170,6 +170,12 @@ class AmuletUtil {
 
 			this.timeouts.delete(guildId);
 
+			if (isTimeout) {
+				console.log(
+					`Amulet timeout triggered for user ${userId} in guild ${guildId} after 6 hours`,
+				);
+			}
+
 			const message = isTimeout
 				? `${userProfile.displayName || userProfile.username} held the amulet for too long (6 hours)! It's now available for anyone to claim.`
 				: `${userProfile.displayName || userProfile.username} has lost the amulet! It's now available for anyone to claim.`;

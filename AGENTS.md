@@ -37,8 +37,10 @@ mise exec -- deno run -A npm:@biomejs/biome check --write <path>  # Fix file
 
 ```bash
 mise run test            # Run all tests
-mise run test:watch     # Run tests in watch mode
+mise run test:watch      # Run tests in watch mode
 ```
+
+> **Note**: Tests run with `--no-check` to skip TypeScript type checking (use `mise run lint` for type checking).
 
 Tests are located in `tests/` directory:
 - `tests/fixtures/` - Mock objects and test data
