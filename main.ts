@@ -48,6 +48,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	try {
 		await command.execute(interaction);
 	} catch (error) {
+		console.error("Command execution failed:", error);
 		logger.error("Command execution failed", {
 			commandName: interaction.commandName,
 			error: error instanceof Error ? error.message : String(error),
