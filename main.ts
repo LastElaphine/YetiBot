@@ -50,7 +50,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	} catch (error) {
 		logger.error("Command execution failed", {
 			commandName: interaction.commandName,
-			error: String(error),
+			error: error instanceof Error ? error.message : String(error),
+			stack: error instanceof Error ? error.stack : undefined,
+			userId: interaction.user.id,
+			guildId: interaction.guildId,
 		});
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({
