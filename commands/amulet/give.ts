@@ -47,11 +47,46 @@ class Give extends Command {
 
 		const guildId = interaction.guildId;
 		const channelId = interaction.channelId;
+		const fromUserId = interaction.user.id;
+
+		// Check if user is trying to give to themselves
+		if (user.id === fromUserId) {
+			await interaction.deferReply();
+			const success = await amuletUtil.giveSelf(
+				user,
+				channelId,
+				guildId,
+				fromUserId,
+			);
+			if (success) {
+				await interaction.editReply(
+					"✅ You really tried to give it to yourself, huh?",
+				);
+			}
+			return;
+		}
 
 		await interaction.deferReply();
 
 		try {
-			const success = await amuletUtil.give(user, channelId, guildId);
+			// Get current holder's time held before transfer
+			const currentHolder = await amuletUtil.getCurrentHolder(guildId);
+			let previousHolderTimeMs: number | undefined;
+			if (currentHolder) {
+				const gameState = await amuletUtil.getGameState(guildId);
+				if (gameState?.amulet?.lastTransferred) {
+					previousHolderTimeMs =
+						Date.now() - new Date(gameState.amulet.lastTransferred).getTime();
+				}
+			}
+
+			const success = await amuletUtil.give(
+				user,
+				channelId,
+				guildId,
+				fromUserId,
+				previousHolderTimeMs,
+			);
 
 			if (success) {
 				logger.info("Amulet transferred", {
@@ -63,14 +98,13 @@ class Give extends Command {
 					`✅ Successfully gave the amulet to ${user.username}!`,
 				);
 			} else {
-				const currentHolder = await amuletUtil.getCurrentHolder(guildId);
-				const holderName =
-					currentHolder?.displayName || currentHolder?.username || "someone";
+				const holder = await amuletUtil.getCurrentHolder(guildId);
+				const holderName = holder?.displayName || holder?.username || "someone";
 
 				logger.warn("Amulet transfer failed - already held", {
 					command: "give",
 					targetUserId: user.id,
-					currentHolderId: currentHolder?.id,
+					currentHolderId: holder?.id,
 					guildId,
 				});
 

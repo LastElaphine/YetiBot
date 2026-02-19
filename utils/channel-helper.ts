@@ -1,4 +1,4 @@
-import type { Channel, Client, User } from "discord";
+import type { AttachmentBuilder, Channel, Client, User } from "discord";
 
 export class ChannelHelper {
 	private static instance: ChannelHelper;
@@ -42,6 +42,25 @@ export class ChannelHelper {
 			} catch (error) {
 				console.error(
 					`Failed to send message=${content} to channelId=${channelId}.`,
+					error,
+				);
+			}
+		}
+	}
+
+	public async sendToChannelWithAttachment(
+		channelId: string,
+		content: string,
+		attachment: AttachmentBuilder,
+	) {
+		const channel = await this.getChannel(channelId);
+
+		if (channel?.isSendable()) {
+			try {
+				await channel.send({ content, files: [attachment] });
+			} catch (error) {
+				console.error(
+					`Failed to send message with attachment to channelId=${channelId}.`,
 					error,
 				);
 			}

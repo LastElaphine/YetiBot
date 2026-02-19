@@ -11,6 +11,14 @@ const GIVE_PHRASES = [
 	"Oopsie! The amulet chose you. Fate is cruel, isn't it?",
 ];
 
+const SELF_GIVE_PHRASES = [
+	"You can't give it to yourself, are you stupid?",
+	"Nice try, but you can't pass it to yourself.",
+	"Did you really just try to give it to yourself? That's not how this works.",
+	"Seriously? You can't tag yourself. Try reading the instructions.",
+	"Oh dear... you can't be both the giver and the receiver. That's just sad.",
+];
+
 const TIMEOUT_PHRASES = [
 	"Wow, you held onto that thing for so long I almost forgot about you. Almost.",
 	"Time's up, slowpoke. The amulet gets bored easily.",
@@ -55,6 +63,7 @@ function randomPhrase(phrases: string[]): string {
 
 export const messages = {
 	give: () => randomPhrase(GIVE_PHRASES),
+	selfGive: () => randomPhrase(SELF_GIVE_PHRASES),
 	timeout: () => randomPhrase(TIMEOUT_PHRASES),
 	reset: () => randomPhrase(RESET_PHRASES),
 	newLeader: () => randomPhrase(NEW_LEADER_PHRASES),

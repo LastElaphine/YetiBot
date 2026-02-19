@@ -1,5 +1,7 @@
 import { clearTimeout, setTimeout } from "node:timers";
+import { resolve } from "@std/path";
 import type { Client, User } from "discord";
+import { AttachmentBuilder } from "discord";
 import type { UserProfile } from "../types/database.ts";
 import { ChannelHelper } from "./channel-helper.ts";
 import { DatabaseManager } from "./database-manager.ts";
@@ -9,6 +11,7 @@ import { messages } from "./messages.ts";
 const BEADS_EMOJI = "📿";
 const BEADS_ROLE_NAME = "📿";
 const MAX_HOLD_TIME_MS = 6 * 60 * 60 * 1000; // 6 hours
+const TAG_GIF_PATH = resolve(Deno.cwd(), "assets", "tag.gif");
 
 class AmuletUtil {
 	private static instance: AmuletUtil;
@@ -31,7 +34,13 @@ class AmuletUtil {
 		return AmuletUtil.instance;
 	}
 
-	async give(user: User, channelId: string, guildId: string): Promise<boolean> {
+	async give(
+		user: User,
+		channelId: string,
+		guildId: string,
+		fromUserId?: string,
+		previousHolderTimeMs?: number,
+	): Promise<boolean> {
 		try {
 			let gameState = await this.dbManager.getGameState(guildId);
 			if (!gameState) {
@@ -121,10 +130,45 @@ class AmuletUtil {
 			// Update nickname and role
 			await this.updateHolderStatus(user.id, guildId);
 
-			await ChannelHelper.getInstance(this.client).sendToChannel(
-				channelId,
-				messages.give(),
-			);
+			// Format the message with mentions and time
+			const formatTime = (ms: number): string => {
+				const seconds = Math.floor(ms / 1000);
+				const minutes = Math.floor(seconds / 60);
+				const hours = Math.floor(minutes / 60);
+
+				if (hours > 0) {
+					return `${hours}h ${minutes % 60}m`;
+				}
+				if (minutes > 0) {
+					return `${minutes}m ${seconds % 60}s`;
+				}
+				return `${seconds}s`;
+			};
+
+			const timeStr = previousHolderTimeMs
+				? `after holding it for ${formatTime(previousHolderTimeMs)}`
+				: "";
+			const sassyPhrase = messages.give();
+			const message = fromUserId
+				? `<@${fromUserId}> passed the amulet to ${user} ${timeStr}. ${sassyPhrase}`
+				: sassyPhrase;
+
+			// Try to send with GIF if it exists
+			try {
+				const gifData = await Deno.readFile(TAG_GIF_PATH);
+				const attachment = new AttachmentBuilder(gifData, {
+					name: "tag.gif",
+				});
+				await ChannelHelper.getInstance(
+					this.client,
+				).sendToChannelWithAttachment(channelId, message, attachment);
+			} catch {
+				// If GIF fails, just send message
+				await ChannelHelper.getInstance(this.client).sendToChannel(
+					channelId,
+					message,
+				);
+			}
 
 			// Check for leader change
 			await this.checkLeaderChange(
@@ -144,6 +188,54 @@ class AmuletUtil {
 			});
 			return false;
 		}
+	}
+
+	async giveSelf(
+		_user: User,
+		channelId: string,
+		guildId: string,
+		fromUserId: string,
+	): Promise<boolean> {
+		try {
+			const gameState = await this.dbManager.getGameState(guildId);
+			if (!gameState) return false;
+
+			const amuletState = gameState.amulet;
+			if (amuletState.currentHolder) return false;
+
+			// Create the message with self-give phrase
+			const message = messages.selfGive();
+
+			// Try to send with GIF if it exists
+			try {
+				const gifData = await Deno.readFile(TAG_GIF_PATH);
+				const attachment = new AttachmentBuilder(gifData, {
+					name: "tag.gif",
+				});
+				await ChannelHelper.getInstance(
+					this.client,
+				).sendToChannelWithAttachment(
+					channelId,
+					`<@${fromUserId}> ${message}`,
+					attachment,
+				);
+			} catch {
+				// If GIF fails, just send message
+				await ChannelHelper.getInstance(this.client).sendToChannel(
+					channelId,
+					`<@${fromUserId}> ${message}`,
+				);
+			}
+
+			return true;
+		} catch (error) {
+			console.error("Failed to process self-give:", error);
+			return false;
+		}
+	}
+
+	async getGameState(guildId: string) {
+		return await this.dbManager.getGameState(guildId);
 	}
 
 	private async clearAmulet(

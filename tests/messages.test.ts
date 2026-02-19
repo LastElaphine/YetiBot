@@ -8,6 +8,13 @@ Deno.test("messages.give returns a string", () => {
 	assert(phrase.length > 0);
 });
 
+Deno.test("messages.selfGive returns a string", () => {
+	const phrase = messages.selfGive();
+	assertExists(phrase);
+	assert(typeof phrase === "string");
+	assert(phrase.length > 0);
+});
+
 Deno.test("messages.timeout returns a string", () => {
 	const phrase = messages.timeout();
 	assertExists(phrase);
