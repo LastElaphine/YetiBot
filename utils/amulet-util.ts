@@ -7,6 +7,7 @@ import { logger } from "./logger.ts";
 
 const BEADS_EMOJI = "📿";
 const BEADS_ROLE_NAME = "beads";
+const MAX_HOLD_TIME_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 class AmuletUtil {
 	private static instance: AmuletUtil;
@@ -98,12 +99,10 @@ class AmuletUtil {
 				},
 			});
 
-			// Set new timeout using number ID
-			const timeoutMs =
-				gameState.settings?.amuletTimeoutMs || amuletState.timeoutMs || 60000;
+			// Set new timeout using max hold time (6 hours)
 			const timeoutId = setTimeout(
-				() => this.clearAmulet(user.id, channelId, guildId),
-				timeoutMs,
+				() => this.clearAmulet(user.id, channelId, guildId, true),
+				MAX_HOLD_TIME_MS,
 			) as unknown as number;
 			this.timeouts.set(guildId, timeoutId);
 
@@ -126,6 +125,7 @@ class AmuletUtil {
 		userId: string,
 		channelId: string,
 		guildId: string,
+		isTimeout = false,
 	): Promise<void> {
 		try {
 			const userProfile = await this.dbManager.getUserProfile(userId, guildId);
@@ -170,12 +170,60 @@ class AmuletUtil {
 
 			this.timeouts.delete(guildId);
 
+			const message = isTimeout
+				? `${userProfile.displayName || userProfile.username} held the amulet for too long (6 hours)! It's now available for anyone to claim.`
+				: `${userProfile.displayName || userProfile.username} has lost the amulet! It's now available for anyone to claim.`;
+
 			await ChannelHelper.getInstance(this.client).sendToChannel(
 				channelId,
-				`${userProfile.displayName || userProfile.username} has lost the amulet! It's now available for anyone to claim.`,
+				message,
 			);
 		} catch (error) {
 			console.error(`Failed to clear amulet for user ${userId}:`, error);
+		}
+	}
+
+	async reset(guildId: string, channelId: string): Promise<boolean> {
+		try {
+			const gameState = await this.dbManager.getGameState(guildId);
+			if (!gameState?.amulet.currentHolder) {
+				return false;
+			}
+
+			const userId = gameState.amulet.currentHolder;
+
+			// Clear timeout
+			const existingTimeout = this.timeouts.get(guildId);
+			if (existingTimeout) {
+				clearTimeout(existingTimeout);
+				this.timeouts.delete(guildId);
+			}
+
+			// Clear nickname and role
+			await this.clearHolderStatus(userId, guildId);
+
+			// Clear game state
+			await this.dbManager.updateGameState(guildId, {
+				amulet: {
+					...gameState.amulet,
+					currentHolder: null,
+					channelId: null,
+				},
+				lastActivity: new Date(),
+			});
+
+			await ChannelHelper.getInstance(this.client).sendToChannel(
+				channelId,
+				`The amulet has been reset by a moderator! It's now available for anyone to claim.`,
+			);
+
+			return true;
+		} catch (error) {
+			logger.error("Failed to reset amulet", {
+				error: error instanceof Error ? error.message : String(error),
+				guildId,
+			});
+			return false;
 		}
 	}
 
