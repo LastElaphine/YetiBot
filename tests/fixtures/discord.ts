@@ -1,5 +1,4 @@
 import type {
-	Collection,
 	Guild,
 	GuildMember,
 	MessagePayload,
@@ -8,6 +7,7 @@ import type {
 	TextBasedChannel,
 	User,
 } from "discord.js";
+import { Collection } from "discord.js";
 
 export class MockUser implements User {
 	public readonly id: string;
