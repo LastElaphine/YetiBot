@@ -100,6 +100,17 @@ class AmuletUtil {
 				},
 			});
 
+			// Get previous leader before updating
+			const guildDataBefore = await this.dbManager.getGuildData(guildId);
+			const previousTop = guildDataBefore
+				? Array.from(guildDataBefore.users.values())
+						.filter((u) => u.stats.amuletHeldTimeMs > 0)
+						.sort(
+							(a, b) => b.stats.amuletHeldTimeMs - a.stats.amuletHeldTimeMs,
+						)[0]
+				: undefined;
+			const previousTopUserId = previousTop?.id;
+
 			// Set new timeout using max hold time (6 hours)
 			const timeoutId = setTimeout(
 				() => this.clearAmulet(user.id, channelId, guildId, true),
@@ -113,6 +124,14 @@ class AmuletUtil {
 			await ChannelHelper.getInstance(this.client).sendToChannel(
 				channelId,
 				messages.give(),
+			);
+
+			// Check for leader change
+			await this.checkLeaderChange(
+				user.id,
+				guildId,
+				channelId,
+				previousTopUserId,
 			);
 
 			return true;
@@ -364,6 +383,36 @@ class AmuletUtil {
 		}
 
 		console.log("Amulet state recovery complete");
+	}
+
+	private async checkLeaderChange(
+		userId: string,
+		guildId: string,
+		channelId: string,
+		previousTopUserId?: string,
+	): Promise<void> {
+		const guildData = await this.dbManager.getGuildData(guildId);
+		if (!guildData) return;
+
+		const users = Array.from(guildData.users.values())
+			.filter((u) => u.stats.amuletHeldTimeMs > 0)
+			.sort((a, b) => b.stats.amuletHeldTimeMs - a.stats.amuletHeldTimeMs);
+
+		if (users.length === 0) return;
+
+		const currentTop = users[0];
+
+		if (currentTop.id === userId && currentTop.id !== previousTopUserId) {
+			await ChannelHelper.getInstance(this.client).sendToChannel(
+				channelId,
+				messages.newLeader(),
+			);
+		} else if (previousTopUserId && currentTop.id !== previousTopUserId) {
+			await ChannelHelper.getInstance(this.client).sendToChannel(
+				channelId,
+				messages.lostLead(),
+			);
+		}
 	}
 }
 
