@@ -63,9 +63,8 @@ export class ChannelHelper {
 
 		if (channel?.isSendable()) {
 			try {
-				const attachment = new AttachmentBuilder(fileBuffer, {
-					name: fileName,
-				});
+				const buffer = Buffer.from(fileBuffer);
+				const attachment = new AttachmentBuilder(buffer, { name: fileName });
 				await channel.send({ content, files: [attachment] });
 			} catch (error) {
 				console.error(
