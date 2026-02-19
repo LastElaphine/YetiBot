@@ -79,9 +79,11 @@ class Give extends Command {
 				});
 			}
 		} catch (error) {
+			console.error("Error in give command:", error);
 			logger.error("Error in give command", {
 				command: "give",
-				error: String(error),
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
 			});
 			await interaction.editReply({
 				content: "An error occurred while giving the amulet. Please try again.",
