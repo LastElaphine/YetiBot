@@ -189,7 +189,7 @@ class AmuletUtil {
 		}
 	}
 
-	async reset(guildId: string, channelId: string): Promise<boolean> {
+	async reset(guildId: string): Promise<boolean> {
 		try {
 			const gameState = await this.dbManager.getGameState(guildId);
 			if (!gameState?.amulet.currentHolder) {
@@ -240,11 +240,6 @@ class AmuletUtil {
 				},
 				lastActivity: new Date(),
 			});
-
-			await ChannelHelper.getInstance(this.client).sendToChannel(
-				channelId,
-				`The amulet has been reset by a moderator! It's now available for anyone to claim.`,
-			);
 
 			return true;
 		} catch (error) {

@@ -27,12 +27,11 @@ class Reset extends Command {
 		}
 
 		const guildId = interaction.guildId;
-		const channelId = interaction.channelId;
 
 		await interaction.deferReply();
 
 		try {
-			const success = await amuletUtil.reset(guildId, channelId);
+			const success = await amuletUtil.reset(guildId);
 
 			if (success) {
 				await interaction.editReply("✅ The amulet has been reset!");
