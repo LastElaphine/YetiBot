@@ -79,9 +79,11 @@ class Leaderboard extends Command {
 			const lines = usersWithCurrentTime.slice(0, 10).map((user, index) => {
 				const displayName = user.displayName || user.username;
 				const duration = formatDuration(user.totalTime);
+				const count = user.stats.amuletHeldCount;
+				const countStr = count === 1 ? "1 time" : `${count} times`;
 				const isCurrentHolder =
 					user.id === currentHolderId ? " (currently)" : "";
-				return `${index + 1}. **${displayName}** - ${duration}${isCurrentHolder}`;
+				return `${index + 1}. **${displayName}** - ${duration} (${countStr})${isCurrentHolder}`;
 			});
 
 			await interaction.reply(
