@@ -6,7 +6,7 @@ import { DatabaseManager } from "./database-manager.ts";
 import { logger } from "./logger.ts";
 
 const BEADS_EMOJI = "📿";
-const BEADS_ROLE_NAME = "beads";
+const BEADS_ROLE_NAME = "📿";
 const MAX_HOLD_TIME_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 class AmuletUtil {
@@ -292,7 +292,11 @@ class AmuletUtil {
 				);
 			}
 		} catch (error) {
-			console.error("Failed to update holder status:", error);
+			if (error instanceof Error && "code" in error) {
+				console.error(`Failed to update holder status: ${error.message}`);
+			} else {
+				console.error("Failed to update holder status:", error);
+			}
 		}
 	}
 
@@ -317,7 +321,11 @@ class AmuletUtil {
 				await member.setNickname(newNickname || null);
 			}
 		} catch (error) {
-			console.error("Failed to clear holder status:", error);
+			if (error instanceof Error && "code" in error) {
+				console.error(`Failed to clear holder status: ${error.message}`);
+			} else {
+				console.error("Failed to clear holder status:", error);
+			}
 		}
 	}
 
