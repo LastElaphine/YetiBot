@@ -34,6 +34,17 @@ docker-compose up bot
 docker-compose up dev
 ```
 
+### Deploying Slash Commands
+
+```bash
+# Deploy commands to test server (guild in config.json)
+mise run deploy-dev-commands
+# or
+deno run --allow-all deploy-commands.ts
+```
+
+Commands are automatically registered when the bot starts.
+
 ## Features
 - Slash commands
 - Amulet game
