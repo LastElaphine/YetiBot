@@ -1,21 +1,13 @@
-# YetiBot
-My personal Discord bot. Written in TypeScript and constantly evolving based on whatever cool ideas I have.
+# YetiBot 🤖
 
-## Objectives
-- [x] Setup Deno
-- [x] Setup Biome
-- [ ] Configure OpenTelemetry
-- [x] Setup Discord.js with a simple bot
-- [x] Create an easy dev environment
-- [ ] Create an easy update process
-- [x] Setup Biome CI integrations for github
-- [x] Setup testing environment with Deno
+My personal Discord bot. Written in TypeScript and constantly evolving based on whatever cool ideas I have.
 
 ## Quick Start
 
 ### Development
+
 ```bash
-# Install dependencies
+# Install dependencies and run with hot-reload
 mise run dev
 
 # Run tests
@@ -23,15 +15,6 @@ mise run test
 
 # Lint
 mise run lint
-```
-
-### Docker
-```bash
-# Production
-docker-compose up bot
-
-# Development with hot-reload
-docker-compose up dev
 ```
 
 ### Deploying Slash Commands
@@ -46,14 +29,26 @@ deno run --allow-all deploy-commands.ts
 Commands are automatically registered when the bot starts.
 
 ## Features
-- Slash commands
-- Amulet game
-- Tag game
-- User stats and leaderboards
+
+- 📿 **Amulet Game** - Pass the cursed amulet around, track holding times
+- 🏆 **Leaderboards** - See who has held the amulet the longest
+- 📊 **User Stats** - Track amulet holds and time statistics
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/give` | Give the amulet to a user |
+| `/who` | Shows who currently has the amulet |
+| `/leaderboard` | Shows ranking by time held |
+| `/reset` | Force reset the amulet (moderator) |
+| `/ping` | Pong! |
+| `/user` | User info |
 
 ## Tech Stack
-- Deno (runtime)
-- TypeScript
-- Discord.js
-- Biome (linting/formatting)
-- LowDB (JSON database)
+
+- ⚡ [Deno](https://deno.land/) (runtime)
+- 🦸 TypeScript
+- 💬 [Discord.js](https://discord.js.org/)
+- 🔧 [Biome](https://biomejs.dev/) (linting/formatting)
+- 💾 [LowDB](https://github.com/typicode/lowdb) (JSON database)
