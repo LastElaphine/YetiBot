@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./data:/app/data
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./data:/app/data
+      - .:/app
+    command: ["deno", "run", "--allow-all", "--watch", "main.ts"]
+    stdin_open: true
+    tty: true
+    restart: on-failure

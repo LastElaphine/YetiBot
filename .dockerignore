@@ -1,0 +1,7 @@
+.git
+.github
+.beads
+node_modules
+data
+.env
+*.log
