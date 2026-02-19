@@ -28,7 +28,7 @@ mise exec -- deno run --allow-all main.ts
 
 ```bash
 mise run lint             # Run Biome check (lint + imports + formatting)
-mise run lint:fix         # Run Biome check and auto-fix issues
+mise run lint-fix         # Run Biome check and auto-fix issues
 mise exec -- deno run -A npm:@biomejs/biome check <path>    # Lint file
 mise exec -- deno run -A npm:@biomejs/biome check --write <path>  # Fix file
 ```
