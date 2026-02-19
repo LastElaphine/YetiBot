@@ -297,15 +297,54 @@ class AmuletUtil {
 			console.error("Failed to clear holder status:", error);
 		}
 	}
+
+	async recoverState(): Promise<void> {
+		const dbData = this.dbManager.getDbData();
+		if (!dbData?.guilds) return;
+
+		console.log("Recovering amulet state from database...");
+
+		for (const [guildId, guildData] of dbData.guilds) {
+			const gameState = guildData.gameState;
+			const currentHolderId = gameState?.amulet?.currentHolder;
+			if (!currentHolderId) continue;
+
+			const lastTransferred = gameState.amulet.lastTransferred;
+			if (!lastTransferred) continue;
+
+			const timeHeld = Date.now() - new Date(lastTransferred).getTime();
+			const remainingTime = MAX_HOLD_TIME_MS - timeHeld;
+			const channelId = gameState.amulet.channelId || "";
+
+			if (remainingTime <= 0) {
+				console.log(`Amulet expired for guild ${guildId} during downtime`);
+				await this.clearAmulet(currentHolderId, channelId, guildId, true);
+			} else {
+				console.log(
+					`Restoring timeout for guild ${guildId}: ${Math.round(remainingTime / 1000 / 60)}min remaining`,
+				);
+				const timeoutId = setTimeout(
+					() => this.clearAmulet(currentHolderId, channelId, guildId, true),
+					remainingTime,
+				) as unknown as number;
+				this.timeouts.set(guildId, timeoutId);
+
+				await this.updateHolderStatus(currentHolderId, guildId);
+			}
+		}
+
+		console.log("Amulet state recovery complete");
+	}
 }
 
 let amuletUtil: AmuletUtil;
 
-export const initializeAmuletUtil = (client: Client) => {
+export const initializeAmuletUtil = async (client: Client) => {
 	amuletUtil = AmuletUtil.getInstance(
 		DatabaseManager.getInstance(client),
 		client,
 	);
+	await amuletUtil.recoverState();
 };
 
 export { AmuletUtil, amuletUtil };

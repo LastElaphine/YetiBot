@@ -319,6 +319,10 @@ class DatabaseManager {
 		return this.db.data || null;
 	}
 
+	getDbData(): DatabaseSchema | null {
+		return this.db.data || null;
+	}
+
 	async saveGameState(
 		guildId: string,
 		gameState: Partial<GuildGameState>,

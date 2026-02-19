@@ -12,7 +12,7 @@ ChannelHelper.getInstance(client);
 const dbManager = DatabaseManager.getInstance(client);
 await dbManager.initialize();
 
-initializeAmuletUtil(client);
+await initializeAmuletUtil(client);
 
 const commands = await loadCommands();
 logger.info("Commands loaded", {
