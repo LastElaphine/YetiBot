@@ -42,7 +42,11 @@ export class AtomicJSONFile<T> implements Adapter<T> {
 	private reviveMaps(obj: unknown): unknown {
 		if (obj && typeof obj === "object") {
 			if (obj._type === "Map") {
-				return new Map(obj._value);
+				const revived = new Map(obj._value);
+				for (const [key, value] of revived) {
+					revived.set(key, this.reviveMaps(value));
+				}
+				return revived;
 			}
 			for (const key in obj) {
 				obj[key] = this.reviveMaps(obj[key]);

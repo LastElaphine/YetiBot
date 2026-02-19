@@ -5,7 +5,6 @@ import { initializeAmuletUtil } from "./utils/amulet-util.ts";
 import { ChannelHelper } from "./utils/channel-helper.ts";
 import { DatabaseManager } from "./utils/database-manager.ts";
 import { logger } from "./utils/logger.ts";
-import { initializeTagUtil } from "./utils/tag-util.ts";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -14,7 +13,6 @@ const dbManager = DatabaseManager.getInstance(client);
 await dbManager.initialize();
 
 initializeAmuletUtil(client);
-initializeTagUtil(client);
 
 const commands = await loadCommands();
 logger.info("Commands loaded", {
@@ -42,7 +40,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	logger.debug("Command executed", {
 		commandName: interaction.commandName,
 		userId: interaction.user.id,
+		username: interaction.user.username,
 		guildId: interaction.guildId,
+		channelId: interaction.channelId,
 	});
 
 	try {
@@ -54,7 +54,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			error: error instanceof Error ? error.message : String(error),
 			stack: error instanceof Error ? error.stack : undefined,
 			userId: interaction.user.id,
+			username: interaction.user.username,
 			guildId: interaction.guildId,
+			channelId: interaction.channelId,
 		});
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({
