@@ -5,6 +5,7 @@ import {
 } from "discord";
 import { Command } from "../../command.ts";
 import { amuletUtil } from "../../utils/amulet-util.ts";
+import { logger } from "../../utils/logger.ts";
 
 class Give extends Command {
 	public override get data(): SlashCommandBuilder {
@@ -47,28 +48,41 @@ class Give extends Command {
 		const guildId = interaction.guildId;
 		const channelId = interaction.channelId;
 
-		// Show immediate feedback
 		await interaction.deferReply();
 
 		try {
 			const success = await amuletUtil.give(user, channelId, guildId);
 
 			if (success) {
+				logger.info("Amulet transferred", {
+					command: "give",
+					targetUserId: user.id,
+					guildId,
+				});
 				await interaction.editReply(
 					`✅ Successfully gave the amulet to ${user.username}!`,
 				);
 			} else {
-				// Check who currently has the amulet
 				const currentHolder = await amuletUtil.getCurrentHolder(guildId);
 				const holderName =
 					currentHolder?.displayName || currentHolder?.username || "someone";
+
+				logger.warn("Amulet transfer failed - already held", {
+					command: "give",
+					targetUserId: user.id,
+					currentHolderId: currentHolder?.id,
+					guildId,
+				});
 
 				await interaction.editReply({
 					content: `❌ Cannot give the amulet. It's currently held by ${holderName}.`,
 				});
 			}
 		} catch (error) {
-			console.error("Error in give command:", error);
+			logger.error("Error in give command", {
+				command: "give",
+				error: String(error),
+			});
 			await interaction.editReply({
 				content: "An error occurred while giving the amulet. Please try again.",
 			});

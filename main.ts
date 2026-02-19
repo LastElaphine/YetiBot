@@ -4,6 +4,7 @@ import config from "./config.json" with { type: "json" };
 import { initializeAmuletUtil } from "./utils/amulet-util.ts";
 import { ChannelHelper } from "./utils/channel-helper.ts";
 import { DatabaseManager } from "./utils/database-manager.ts";
+import { logger } from "./utils/logger.ts";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -11,20 +12,19 @@ ChannelHelper.getInstance(client);
 const dbManager = DatabaseManager.getInstance(client);
 await dbManager.initialize();
 
-// Initialize amulet utility after database is ready
 initializeAmuletUtil(client);
 
 const commands = await loadCommands();
-console.log(
-	`Loaded Commands: ${JSON.stringify(
-		commands.map((value: Command) => value.data),
-		null,
-		2,
-	)}`,
-);
+logger.info("Commands loaded", {
+	commandCount: commands.size,
+	commands: commands.map((value: Command) => value.data.name),
+});
 
 client.once(Events.ClientReady, (readyClient) => {
-	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+	logger.info("Bot ready", {
+		tag: readyClient.user.tag,
+		id: readyClient.user.id,
+	});
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -33,14 +33,23 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	const command = commands.get(interaction.commandName) as Command;
 
 	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
+		logger.warn("Command not found", { commandName: interaction.commandName });
 		return;
 	}
+
+	logger.debug("Command executed", {
+		commandName: interaction.commandName,
+		userId: interaction.user.id,
+		guildId: interaction.guildId,
+	});
 
 	try {
 		await command.execute(interaction);
 	} catch (error) {
-		console.error(error);
+		logger.error("Command execution failed", {
+			commandName: interaction.commandName,
+			error: String(error),
+		});
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({
 				content: "There was an error while executing this command!",

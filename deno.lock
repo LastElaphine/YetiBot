@@ -2,7 +2,11 @@
   "version": "5",
   "specifiers": {
     "jsr:@std/assert@1": "1.0.14",
+    "jsr:@std/fmt@^1.0.5": "1.0.9",
+    "jsr:@std/fs@^1.0.11": "1.0.22",
     "jsr:@std/internal@^1.0.10": "1.0.10",
+    "jsr:@std/io@~0.225.2": "0.225.3",
+    "jsr:@std/log@0.224": "0.224.14",
     "npm:@biomejs/biome@*": "2.2.4",
     "npm:@biomejs/biome@^2.2.4": "2.2.4",
     "npm:@types/node@*": "24.2.0",
@@ -19,8 +23,31 @@
         "jsr:@std/internal"
       ]
     },
+    "@std/assert@1.0.18": {
+      "integrity": "270245e9c2c13b446286de475131dc688ca9abcd94fc5db41d43a219b34d1c78"
+    },
+    "@std/fmt@1.0.9": {
+      "integrity": "2487343e8899fb2be5d0e3d35013e54477ada198854e52dd05ed0422eddcabe0"
+    },
+    "@std/fs@1.0.22": {
+      "integrity": "de0f277a58a867147a8a01bc1b181d0dfa80bfddba8c9cf2bacd6747bcec9308"
+    },
     "@std/internal@1.0.10": {
       "integrity": "e3be62ce42cab0e177c27698e5d9800122f67b766a0bea6ca4867886cbde8cf7"
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    },
+    "@std/io@0.225.3": {
+      "integrity": "27b07b591384d12d7b568f39e61dff966b8230559122df1e9fd11cc068f7ddd1"
+    },
+    "@std/log@0.224.14": {
+      "integrity": "257f7adceee3b53bb2bc86c7242e7d1bc59729e57d4981c4a7e5b876c808f05e",
+      "dependencies": [
+        "jsr:@std/fmt",
+        "jsr:@std/fs",
+        "jsr:@std/io"
+      ]
     }
   },
   "npm": {
@@ -225,6 +252,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@1",
+      "jsr:@std/log@0.224",
       "npm:@biomejs/biome@^2.2.4",
       "npm:discord.js@^14.22.1",
       "npm:lowdb@^7.0.1",
