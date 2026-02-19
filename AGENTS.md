@@ -33,6 +33,51 @@ mise exec -- deno run -A npm:@biomejs/biome check <path>    # Lint file
 mise exec -- deno run -A npm:@biomejs/biome check --write <path>  # Fix file
 ```
 
+### Testing
+
+```bash
+mise run test            # Run all tests
+mise run test:watch     # Run tests in watch mode
+```
+
+Tests are located in `tests/` directory:
+- `tests/fixtures/` - Mock objects and test data
+- `tests/commands/` - Command unit tests
+
+#### Writing Tests
+
+Use Deno's built-in test runner with `@std/assert`:
+
+```typescript
+import { assertEquals, assertExists } from "@std/assert";
+
+Deno.test("Command name is correct", async () => {
+  const { command } = await import("./commands/utility/ping.ts");
+  assertEquals(command.data.name, "ping");
+});
+```
+
+#### Mock Objects
+
+Import test fixtures from `tests/fixtures/mod.ts`:
+
+```typescript
+import { createMockCommandInteraction, MockUser, MockGuild } from "../fixtures/mod.ts";
+
+const interaction = createMockCommandInteraction({
+  commandName: "ping",
+  userId: "123",
+  guildId: "456",
+});
+```
+
+#### Running Specific Tests
+
+```bash
+deno test --no-check --allow-all tests/commands/ping.test.ts
+deno test --no-check --allow-all tests/ -f "ping"
+```
+
 ### Required Permissions
 
 - `--allow-all` for development (bot needs Guilds intent, config access)
@@ -99,6 +144,9 @@ YetiBot/
 ├── deploy-commands.ts      # Slash command registration
 ├── commands/<category>/<name>.ts  # Slash commands
 ├── utils/<name>-util.ts     # Singleton utilities
+├── tests/                   # Test files
+│   ├── fixtures/           # Mock objects and test data
+│   └── commands/           # Command unit tests
 ├── deno.json                # Tasks, imports
 ├── biome.json               # Linter/formatter config
 └── AGENTS.md                # This file
