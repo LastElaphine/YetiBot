@@ -4,6 +4,7 @@ import type { UserProfile } from "../types/database.ts";
 import { ChannelHelper } from "./channel-helper.ts";
 import { DatabaseManager } from "./database-manager.ts";
 import { logger } from "./logger.ts";
+import { messages } from "./messages.ts";
 
 const BEADS_EMOJI = "📿";
 const BEADS_ROLE_NAME = "📿";
@@ -109,6 +110,11 @@ class AmuletUtil {
 			// Update nickname and role
 			await this.updateHolderStatus(user.id, guildId);
 
+			await ChannelHelper.getInstance(this.client).sendToChannel(
+				channelId,
+				messages.give(),
+			);
+
 			return true;
 		} catch (error) {
 			logger.error(`Failed to give amulet to user ${user.id}`, {
@@ -176,9 +182,7 @@ class AmuletUtil {
 				);
 			}
 
-			const message = isTimeout
-				? `${userProfile.displayName || userProfile.username} held the amulet for too long (6 hours)! It's now available for anyone to claim.`
-				: `${userProfile.displayName || userProfile.username} has lost the amulet! It's now available for anyone to claim.`;
+			const message = isTimeout ? messages.timeout() : messages.give();
 
 			await ChannelHelper.getInstance(this.client).sendToChannel(
 				channelId,
