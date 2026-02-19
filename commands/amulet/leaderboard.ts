@@ -1,4 +1,8 @@
-import { type CommandInteraction, SlashCommandBuilder } from "discord";
+import {
+	type CommandInteraction,
+	EmbedBuilder,
+	SlashCommandBuilder,
+} from "discord";
 import { Command } from "../../command.ts";
 import { DatabaseManager } from "../../utils/database-manager.ts";
 
@@ -81,14 +85,19 @@ class Leaderboard extends Command {
 				const duration = formatDuration(user.totalTime);
 				const count = user.stats.amuletHeldCount;
 				const countStr = count === 1 ? "1 time" : `${count} times`;
-				const isCurrentHolder =
-					user.id === currentHolderId ? " (currently)" : "";
-				return `${index + 1}. **${displayName}** - ${duration} (${countStr})${isCurrentHolder}`;
+				const isCurrentHolder = user.id === currentHolderId ? " 🟢" : "";
+				return {
+					name: `#${index + 1} ${displayName}${isCurrentHolder}`,
+					value: `${duration} (${countStr})`,
+				};
 			});
 
-			await interaction.reply(
-				`🏆 **Amulet Leaderboard**\n\n${lines.join("\n")}`,
-			);
+			const embed = new EmbedBuilder()
+				.setTitle("🏆 Amulet Leaderboard")
+				.setColor(0x9b59b6)
+				.addFields(lines);
+
+			await interaction.reply({ embeds: [embed] });
 		} catch (error) {
 			console.error("Error in leaderboard command:", error);
 			await interaction.reply({
