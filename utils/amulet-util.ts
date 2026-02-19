@@ -5,6 +5,9 @@ import { ChannelHelper } from "./channel-helper.ts";
 import { DatabaseManager } from "./database-manager.ts";
 import { logger } from "./logger.ts";
 
+const BEADS_EMOJI = "📿";
+const BEADS_ROLE_NAME = "beads";
+
 class AmuletUtil {
 	private static instance: AmuletUtil;
 	private dbManager: DatabaseManager;
@@ -104,6 +107,9 @@ class AmuletUtil {
 			) as unknown as number;
 			this.timeouts.set(guildId, timeoutId);
 
+			// Update nickname and role
+			await this.updateHolderStatus(user.id, guildId);
+
 			return true;
 		} catch (error) {
 			logger.error(`Failed to give amulet to user ${user.id}`, {
@@ -138,6 +144,9 @@ class AmuletUtil {
 					amuletHeldTimeMs: userProfile.stats.amuletHeldTimeMs + timeHeld,
 				},
 			});
+
+			// Clear nickname and role
+			await this.clearHolderStatus(userId, guildId);
 
 			// Update leaderboard
 			const username = userProfile.displayName || userProfile.username;
@@ -178,6 +187,61 @@ class AmuletUtil {
 			gameState.amulet.currentHolder,
 			guildId,
 		);
+	}
+
+	private async updateHolderStatus(
+		userId: string,
+		guildId: string,
+	): Promise<void> {
+		const guild = this.client.guilds.cache.get(guildId);
+		if (!guild) return;
+
+		const member = await guild.members.fetch(userId);
+		if (!member) return;
+
+		try {
+			const role =
+				guild.roles.cache.find((r) => r.name === BEADS_ROLE_NAME) ||
+				(await guild.roles.create({
+					name: BEADS_ROLE_NAME,
+					reason: "Role for amulet holder",
+				}));
+
+			await member.roles.add(role);
+
+			if (!member.nickname?.startsWith(BEADS_EMOJI)) {
+				await member.setNickname(
+					`${BEADS_EMOJI} ${member.nickname || member.user.username}`,
+				);
+			}
+		} catch (error) {
+			console.error("Failed to update holder status:", error);
+		}
+	}
+
+	private async clearHolderStatus(
+		userId: string,
+		guildId: string,
+	): Promise<void> {
+		const guild = this.client.guilds.cache.get(guildId);
+		if (!guild) return;
+
+		const member = await guild.members.fetch(userId);
+		if (!member) return;
+
+		try {
+			const role = guild.roles.cache.find((r) => r.name === BEADS_ROLE_NAME);
+			if (role) {
+				await member.roles.remove(role);
+			}
+
+			if (member.nickname?.startsWith(BEADS_EMOJI)) {
+				const newNickname = member.nickname.slice(BEADS_EMOJI.length + 1);
+				await member.setNickname(newNickname || null);
+			}
+		} catch (error) {
+			console.error("Failed to clear holder status:", error);
+		}
 	}
 }
 
