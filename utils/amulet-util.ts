@@ -255,6 +255,7 @@ class AmuletUtil {
 			await this.clearHolderStatus(userId, guildId);
 
 			// Clear game state
+			const channelId = gameState.amulet.channelId;
 			await this.dbManager.updateGameState(guildId, {
 				amulet: {
 					...gameState.amulet,
@@ -263,6 +264,13 @@ class AmuletUtil {
 				},
 				lastActivity: new Date(),
 			});
+
+			if (channelId) {
+				await ChannelHelper.getInstance(this.client).sendToChannel(
+					channelId,
+					messages.reset(),
+				);
+			}
 
 			return true;
 		} catch (error) {
