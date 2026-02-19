@@ -5,6 +5,7 @@ import { initializeAmuletUtil } from "./utils/amulet-util.ts";
 import { ChannelHelper } from "./utils/channel-helper.ts";
 import { DatabaseManager } from "./utils/database-manager.ts";
 import { logger } from "./utils/logger.ts";
+import { initializeTagUtil } from "./utils/tag-util.ts";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -13,6 +14,7 @@ const dbManager = DatabaseManager.getInstance(client);
 await dbManager.initialize();
 
 initializeAmuletUtil(client);
+initializeTagUtil(client);
 
 const commands = await loadCommands();
 logger.info("Commands loaded", {
