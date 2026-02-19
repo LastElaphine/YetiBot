@@ -1,7 +1,6 @@
 import { clearTimeout, setTimeout } from "node:timers";
 import { resolve } from "@std/path";
 import type { Client, User } from "discord";
-import { AttachmentBuilder } from "discord";
 import type { UserProfile } from "../types/database.ts";
 import { ChannelHelper } from "./channel-helper.ts";
 import { DatabaseManager } from "./database-manager.ts";
@@ -156,12 +155,9 @@ class AmuletUtil {
 			// Try to send with GIF if it exists
 			try {
 				const gifData = await Deno.readFile(TAG_GIF_PATH);
-				const attachment = new AttachmentBuilder(gifData, {
-					name: "tag.gif",
-				});
 				await ChannelHelper.getInstance(
 					this.client,
-				).sendToChannelWithAttachment(channelId, message, attachment);
+				).sendToChannelWithAttachment(channelId, message, gifData, "tag.gif");
 			} catch {
 				// If GIF fails, just send message
 				await ChannelHelper.getInstance(this.client).sendToChannel(
@@ -209,15 +205,13 @@ class AmuletUtil {
 			// Try to send with GIF if it exists
 			try {
 				const gifData = await Deno.readFile(TAG_GIF_PATH);
-				const attachment = new AttachmentBuilder(gifData, {
-					name: "tag.gif",
-				});
 				await ChannelHelper.getInstance(
 					this.client,
 				).sendToChannelWithAttachment(
 					channelId,
 					`<@${fromUserId}> ${message}`,
-					attachment,
+					gifData,
+					"tag.gif",
 				);
 			} catch {
 				// If GIF fails, just send message

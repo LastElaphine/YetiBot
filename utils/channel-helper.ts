@@ -1,4 +1,9 @@
-import type { AttachmentBuilder, Channel, Client, User } from "discord";
+import {
+	AttachmentBuilder,
+	type Channel,
+	type Client,
+	type User,
+} from "discord";
 
 export class ChannelHelper {
 	private static instance: ChannelHelper;
@@ -51,12 +56,16 @@ export class ChannelHelper {
 	public async sendToChannelWithAttachment(
 		channelId: string,
 		content: string,
-		attachment: AttachmentBuilder,
+		fileBuffer: Uint8Array,
+		fileName: string,
 	) {
 		const channel = await this.getChannel(channelId);
 
 		if (channel?.isSendable()) {
 			try {
+				const attachment = new AttachmentBuilder(fileBuffer, {
+					name: fileName,
+				});
 				await channel.send({ content, files: [attachment] });
 			} catch (error) {
 				console.error(
