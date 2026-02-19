@@ -29,14 +29,25 @@ class AmuletUtil {
 		try {
 			let gameState = await this.dbManager.getGameState(guildId);
 			if (!gameState) {
-				// Create guild data if it doesn't exist
 				await this.dbManager.createGuildData(guildId);
 				gameState = await this.dbManager.getGameState(guildId);
 			}
 
-			// Check if amulet is currently held
-			if (gameState?.amulet.currentHolder) {
-				return false; // Amulet is already held
+			if (!gameState) {
+				console.error("Failed to get game state after creation");
+				return false;
+			}
+
+			const amuletState = gameState.amulet || {
+				currentHolder: null,
+				channelId: null,
+				timeoutMs: 60000,
+				lastTransferred: new Date(),
+				transferHistory: [],
+			};
+
+			if (amuletState.currentHolder) {
+				return false;
 			}
 
 			// Clear existing timeout for this guild
@@ -47,7 +58,7 @@ class AmuletUtil {
 
 			// Update game state
 			const transferRecord = {
-				fromUserId: gameState?.amulet.currentHolder || null,
+				fromUserId: amuletState.currentHolder || null,
 				toUserId: user.id,
 				transferredAt: new Date(),
 				channelId,
@@ -55,14 +66,11 @@ class AmuletUtil {
 
 			await this.dbManager.updateGameState(guildId, {
 				amulet: {
-					...gameState?.amulet,
+					...amuletState,
 					currentHolder: user.id,
 					channelId,
 					lastTransferred: new Date(),
-					transferHistory: [
-						...(gameState?.amulet.transferHistory || []),
-						transferRecord,
-					],
+					transferHistory: [...amuletState.transferHistory, transferRecord],
 				},
 				lastActivity: new Date(),
 			});
@@ -88,9 +96,7 @@ class AmuletUtil {
 
 			// Set new timeout using number ID
 			const timeoutMs =
-				gameState?.settings.amuletTimeoutMs ||
-				gameState?.amulet.timeoutMs ||
-				60000;
+				gameState.settings?.amuletTimeoutMs || amuletState.timeoutMs || 60000;
 			const timeoutId = setTimeout(
 				() => this.clearAmulet(user.id, channelId, guildId),
 				timeoutMs,
