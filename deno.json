@@ -3,7 +3,9 @@
 		"dev": "deno run --allow-all --watch main.ts",
 		"deploy-dev-commands": "deno run --allow-all deploy-commands.ts",
 		"lint": "deno run -A npm:@biomejs/biome check",
-		"lint-fix": "deno run -A npm:@biomejs/biome check --write"
+		"lint-fix": "deno run -A npm:@biomejs/biome check --write",
+		"test": "deno test --allow-all tests/",
+		"test:watch": "deno test --allow-all --watch tests/"
 	},
 	"imports": {
 		"@biomejs/biome": "npm:@biomejs/biome@^2.2.4",
