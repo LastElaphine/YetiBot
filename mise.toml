@@ -1,3 +1,11 @@
 [tools]
 deno = "latest"
 node = "22"
+
+[tasks]
+dev = "deno run --allow-all --watch main.ts"
+"deploy-dev-commands" = "deno run --allow-all deploy-commands.ts"
+lint = "deno run -A npm:@biomejs/biome check"
+"lint-fix" = "deno run -A npm:@biomejs/biome check --write"
+test = "deno test --allow-all tests/"
+"test:watch" = "deno test --allow-all --watch tests/"
