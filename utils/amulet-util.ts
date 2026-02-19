@@ -197,12 +197,35 @@ class AmuletUtil {
 			}
 
 			const userId = gameState.amulet.currentHolder;
+			const userProfile = await this.dbManager.getUserProfile(userId, guildId);
 
 			// Clear timeout
 			const existingTimeout = this.timeouts.get(guildId);
 			if (existingTimeout) {
 				clearTimeout(existingTimeout);
 				this.timeouts.delete(guildId);
+			}
+
+			// Calculate and save time held
+			if (gameState.amulet.lastTransferred && userProfile) {
+				const timeHeld =
+					Date.now() - new Date(gameState.amulet.lastTransferred).getTime();
+
+				await this.dbManager.createOrUpdateUserProfile(userId, guildId, {
+					stats: {
+						...userProfile.stats,
+						amuletHeldTimeMs: userProfile.stats.amuletHeldTimeMs + timeHeld,
+					},
+				});
+
+				const username = userProfile.displayName || userProfile.username;
+				await this.dbManager.updateLeaderboard(
+					guildId,
+					"amulet-time",
+					userId,
+					username,
+					userProfile.stats.amuletHeldTimeMs + timeHeld,
+				);
 			}
 
 			// Clear nickname and role
