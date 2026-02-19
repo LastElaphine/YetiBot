@@ -2,14 +2,12 @@ import type { LogRecord } from "@std/log";
 import * as log from "@std/log";
 
 const JSON_FORMATTER = (record: LogRecord): string => {
-	return (
-		JSON.stringify({
-			timestamp: record.datetime.toISOString(),
-			level: record.levelName,
-			logger: record.loggerName,
-			message: record.msg,
-		}) + "\n"
-	);
+	return `${JSON.stringify({
+		timestamp: record.datetime.toISOString(),
+		level: record.levelName,
+		logger: record.loggerName,
+		message: record.msg,
+	})}\n`;
 };
 
 await log.setup({
