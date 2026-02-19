@@ -6,6 +6,43 @@ My personal Discord bot. Written in TypeScript and constantly evolving based on 
 - [x] Setup Biome
 - [ ] Configure OpenTelemetry
 - [x] Setup Discord.js with a simple bot
-- [ ] Create an easy dev environment
+- [x] Create an easy dev environment
 - [ ] Create an easy update process
-- [ ] Setup Biome CI integrations for github
+- [x] Setup Biome CI integrations for github
+- [x] Setup testing environment with Deno
+
+## Quick Start
+
+### Development
+```bash
+# Install dependencies
+mise run dev
+
+# Run tests
+mise run test
+
+# Lint
+mise run lint
+```
+
+### Docker
+```bash
+# Production
+docker-compose up bot
+
+# Development with hot-reload
+docker-compose up dev
+```
+
+## Features
+- Slash commands
+- Amulet game
+- Tag game
+- User stats and leaderboards
+
+## Tech Stack
+- Deno (runtime)
+- TypeScript
+- Discord.js
+- Biome (linting/formatting)
+- LowDB (JSON database)
