@@ -3,6 +3,7 @@ import type { Client, User } from "discord";
 import type { UserProfile } from "../types/database.ts";
 import { ChannelHelper } from "./channel-helper.ts";
 import { DatabaseManager } from "./database-manager.ts";
+import { logger } from "./logger.ts";
 
 class AmuletUtil {
 	private static instance: AmuletUtil;
@@ -105,7 +106,12 @@ class AmuletUtil {
 
 			return true;
 		} catch (error) {
-			console.error(`Failed to give amulet to user ${user.id}:`, error);
+			logger.error(`Failed to give amulet to user ${user.id}`, {
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+				userId: user.id,
+				guildId,
+			});
 			return false;
 		}
 	}
