@@ -104,20 +104,17 @@ class Leaderboard extends Command {
 		const embed = this.buildEmbed(rankedUsers, category, currentHolderId);
 		const components = this.buildButtons(category);
 
-		const { interactionResponse: reply } = await interaction.reply({
+		const replyMessage = await interaction.reply({
 			embeds: [embed],
 			components: [components],
-			withResponse: true,
+			fetchReply: true,
 		});
 
-		if (!reply) return;
-
-		const message = await interaction.channel?.messages.fetch(reply.id);
-		if (!message) return;
+		if (!replyMessage) return;
 
 		const currentCategory = { value: category };
 
-		const collector = message.createMessageComponentCollector({
+		const collector = replyMessage.createMessageComponentCollector({
 			filter: (btnInteraction) =>
 				btnInteraction.user.id === interaction.user.id,
 			time: BUTTON_TIMEOUT_MS,
@@ -169,7 +166,7 @@ class Leaderboard extends Command {
 		collector.on("end", async () => {
 			try {
 				const emptyComponents = new ActionRowBuilder<ButtonBuilder>();
-				await message.edit({ components: [emptyComponents] });
+				await replyMessage.edit({ components: [emptyComponents] });
 			} catch {
 				// Ignore cleanup errors
 			}
