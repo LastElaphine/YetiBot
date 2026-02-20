@@ -8,6 +8,9 @@ export interface UserProfile {
 	stats: {
 		amuletHeldCount: number; // Times amulet was held in this guild
 		amuletHeldTimeMs: number; // Total time holding amulet in this guild
+		longestHoldTimeMs: number; // Longest single hold in this guild
+		passesGiven: number; // Times user passed amulet to others
+		passesReceived: number; // Times user received the amulet
 		gamesPlayed: number; // Total games participated in this guild
 		commandUses: Map<string, number>; // Command usage counts
 	};

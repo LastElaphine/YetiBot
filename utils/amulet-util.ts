@@ -105,6 +105,7 @@ class AmuletUtil {
 				stats: {
 					...userProfile.stats,
 					amuletHeldCount: userProfile.stats.amuletHeldCount + 1,
+					passesReceived: userProfile.stats.passesReceived + 1,
 				},
 			});
 
@@ -249,10 +250,16 @@ class AmuletUtil {
 			const timeHeld = Date.now() - gameState.amulet.lastTransferred.getTime();
 
 			// Update user stats
+			const newLongestHold = Math.max(
+				userProfile.stats.longestHoldTimeMs,
+				timeHeld,
+			);
 			await this.dbManager.createOrUpdateUserProfile(userId, guildId, {
 				stats: {
 					...userProfile.stats,
 					amuletHeldTimeMs: userProfile.stats.amuletHeldTimeMs + timeHeld,
+					longestHoldTimeMs: newLongestHold,
+					passesGiven: userProfile.stats.passesGiven + 1,
 				},
 			});
 
@@ -320,10 +327,17 @@ class AmuletUtil {
 				const timeHeld =
 					Date.now() - new Date(gameState.amulet.lastTransferred).getTime();
 
+				const newLongestHold = Math.max(
+					userProfile.stats.longestHoldTimeMs,
+					timeHeld,
+				);
+
 				await this.dbManager.createOrUpdateUserProfile(userId, guildId, {
 					stats: {
 						...userProfile.stats,
 						amuletHeldTimeMs: userProfile.stats.amuletHeldTimeMs + timeHeld,
+						longestHoldTimeMs: newLongestHold,
+						passesGiven: userProfile.stats.passesGiven + 1,
 					},
 				});
 

@@ -172,6 +172,9 @@ class DatabaseManager {
 				stats: {
 					amuletHeldCount: 0,
 					amuletHeldTimeMs: 0,
+					longestHoldTimeMs: 0,
+					passesGiven: 0,
+					passesReceived: 0,
 					gamesPlayed: 0,
 					commandUses: new Map(),
 				},
