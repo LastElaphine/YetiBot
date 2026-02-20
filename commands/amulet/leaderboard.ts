@@ -1,4 +1,7 @@
 import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
 	type CommandInteraction,
 	EmbedBuilder,
 	MessageFlags,
@@ -16,7 +19,7 @@ import {
 } from "../../utils/leaderboard-util.ts";
 
 const LEADERBOARD_LIMIT = 10;
-const REACTION_TIMEOUT_MS = 120000;
+const BUTTON_TIMEOUT_MS = 120000;
 
 class Leaderboard extends Command {
 	public override get data(): SlashCommandBuilder {
@@ -84,9 +87,104 @@ class Leaderboard extends Command {
 			return;
 		}
 
-		const config = getCategoryConfig(category);
 		const gameState = guildData.gameState;
 		const currentHolderId = gameState.amulet?.currentHolder;
+
+		const rankedUsers = this.getRankedUsers(
+			guildData,
+			category,
+			currentHolderId,
+		);
+
+		if (rankedUsers.length === 0) {
+			await interaction.reply("No data available for this leaderboard yet!");
+			return;
+		}
+
+		const embed = this.buildEmbed(rankedUsers, category, currentHolderId);
+		const components = this.buildButtons(category);
+
+		const reply = await interaction.reply({
+			embeds: [embed],
+			components: [components],
+			fetchReply: true,
+		});
+
+		if (!reply) return;
+
+		const collector = reply.createMessageComponentCollector({
+			filter: (btnInteraction) =>
+				btnInteraction.user.id === interaction.user.id,
+			time: BUTTON_TIMEOUT_MS,
+		});
+
+		collector.on("collect", async (btnInteraction) => {
+			if (!btnInteraction.isButton()) return;
+
+			let newCategory = category;
+			if (btnInteraction.customId === "prev") {
+				newCategory = getPreviousCategory(category);
+			} else if (btnInteraction.customId === "next") {
+				newCategory = getNextCategory(category);
+			} else if (btnInteraction.customId.startsWith("cat_")) {
+				newCategory = btnInteraction.customId.replace(
+					"cat_",
+					"",
+				) as LeaderboardCategory;
+			}
+
+			const newRankedUsers = this.getRankedUsers(
+				guildData,
+				newCategory,
+				currentHolderId,
+			);
+
+			if (newRankedUsers.length === 0) {
+				await btnInteraction.reply({
+					content: "No data available for this leaderboard!",
+					flags: MessageFlags.Ephemeral,
+				});
+				return;
+			}
+
+			const newEmbed = this.buildEmbed(
+				newRankedUsers,
+				newCategory,
+				currentHolderId,
+			);
+			const newComponents = this.buildButtons(newCategory);
+
+			await btnInteraction.update({
+				embeds: [newEmbed],
+				components: [newComponents],
+			});
+		});
+
+		collector.on("end", async () => {
+			try {
+				const emptyComponents = new ActionRowBuilder<ButtonBuilder>();
+				await reply.edit({ components: [emptyComponents] });
+			} catch {
+				// Ignore cleanup errors
+			}
+		});
+	}
+
+	private getRankedUsers(
+		guildData: Awaited<
+			ReturnType<typeof DatabaseManager.prototype.getGuildData>
+		>,
+		category: LeaderboardCategory,
+		currentHolderId: string | null,
+	): Array<{
+		user: import("../../types/database.ts").UserProfile;
+		value: number;
+		rank: number;
+	}> {
+		if (!guildData) return [];
+
+		const config = getCategoryConfig(category);
+		const gameState = guildData.gameState;
 
 		const usersWithValues = Array.from(guildData.users.values())
 			.map((user) => {
@@ -105,99 +203,28 @@ class Leaderboard extends Command {
 			.filter((u) => u.value > 0)
 			.sort((a, b) => b.value - a.value);
 
-		if (usersWithValues.length === 0) {
-			await interaction.reply("No data available for this leaderboard yet!");
-			return;
-		}
-
-		const rankedUsers = usersWithValues
-			.slice(0, LEADERBOARD_LIMIT)
-			.map((u, i) => ({
-				...u,
-				rank: i + 1,
-			}));
-
-		const embed = await this.buildEmbed(rankedUsers, category, currentHolderId);
-
-		const reply = await interaction.reply({
-			embeds: [embed],
-			fetchReply: true,
-		});
-
-		if ("react" in reply) {
-			await reply.react("⬅️");
-			await reply.react("➡️");
-
-			const filter = (reaction: { emoji: { name: string } }) =>
-				reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️";
-
-			const collector = reply.createReactionCollector({
-				filter,
-				time: REACTION_TIMEOUT_MS,
-			});
-
-			collector.on("collect", async (reaction, user) => {
-				if (user.id === interaction.user.id) {
-					const newCategory =
-						reaction.emoji.name === "➡️"
-							? getNextCategory(category)
-							: getPreviousCategory(category);
-
-					await reaction.users.remove(user.id);
-
-					const newConfig = getCategoryConfig(newCategory);
-					const newUsersWithValues = Array.from(guildData.users.values())
-						.map((user) => {
-							let value = newConfig.getValue(user.stats);
-							if (
-								newCategory === "time" &&
-								user.id === currentHolderId &&
-								gameState.amulet?.lastTransferred
-							) {
-								const currentHolderTime =
-									Date.now() -
-									new Date(gameState.amulet.lastTransferred).getTime();
-								value += currentHolderTime;
-							}
-							return { user, value };
-						})
-						.filter((u) => u.value > 0)
-						.sort((a, b) => b.value - a.value);
-
-					if (newUsersWithValues.length === 0) {
-						return;
-					}
-
-					const newRankedUsers = newUsersWithValues
-						.slice(0, LEADERBOARD_LIMIT)
-						.map((u, i) => ({
-							...u,
-							rank: i + 1,
-						}));
-
-					const newEmbed = await this.buildEmbed(
-						newRankedUsers,
-						newCategory,
-						currentHolderId,
-					);
-
-					await reply.edit({ embeds: [newEmbed] });
-
-					(category as string) = newCategory;
-				}
-			});
-
-			collector.on("end", async () => {
-				try {
-					await reply.reactions.removeAll();
-				} catch {
-					// Ignore cleanup errors
-				}
-			});
-		}
+		return usersWithValues.slice(0, LEADERBOARD_LIMIT).map((u, i) => ({
+			...u,
+			rank: i + 1,
+		}));
 	}
 
-	private async buildEmbed(
+	private buildButtons(
+		_category: LeaderboardCategory,
+	): ActionRowBuilder<ButtonBuilder> {
+		return new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder()
+				.setCustomId("prev")
+				.setLabel("◀ Previous")
+				.setStyle(ButtonStyle.Secondary),
+			new ButtonBuilder()
+				.setCustomId("next")
+				.setLabel("Next ▶")
+				.setStyle(ButtonStyle.Secondary),
+		);
+	}
+
+	private buildEmbed(
 		rankedUsers: Array<{
 			user: import("../../types/database.ts").UserProfile;
 			value: number;
@@ -205,7 +232,7 @@ class Leaderboard extends Command {
 		}>,
 		category: LeaderboardCategory,
 		currentHolderId: string | null,
-	): Promise<EmbedBuilder> {
+	): EmbedBuilder {
 		const config = getCategoryConfig(category);
 
 		const fields = rankedUsers.map((entry) => {
@@ -234,7 +261,7 @@ class Leaderboard extends Command {
 		const categoryList = CATEGORIES.map((c) =>
 			c.key === category ? `**${c.label}**` : c.label,
 		).join(" • ");
-		embed.setFooter({ text: `${categoryList}\nUse ⬅️ ➡️ to change categories` });
+		embed.setFooter({ text: `${categoryList}` });
 
 		return embed;
 	}
