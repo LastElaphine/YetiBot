@@ -112,6 +112,8 @@ class Leaderboard extends Command {
 
 		if (!reply) return;
 
+		const currentCategory = { value: category };
+
 		const collector = reply.createMessageComponentCollector({
 			filter: (btnInteraction) =>
 				btnInteraction.user.id === interaction.user.id,
@@ -121,17 +123,18 @@ class Leaderboard extends Command {
 		collector.on("collect", async (btnInteraction) => {
 			if (!btnInteraction.isButton()) return;
 
-			let newCategory = category;
 			if (btnInteraction.customId === "prev") {
-				newCategory = getPreviousCategory(category);
+				currentCategory.value = getPreviousCategory(currentCategory.value);
 			} else if (btnInteraction.customId === "next") {
-				newCategory = getNextCategory(category);
+				currentCategory.value = getNextCategory(currentCategory.value);
 			} else if (btnInteraction.customId.startsWith("cat_")) {
-				newCategory = btnInteraction.customId.replace(
+				currentCategory.value = btnInteraction.customId.replace(
 					"cat_",
 					"",
 				) as LeaderboardCategory;
 			}
+
+			const newCategory = currentCategory.value;
 
 			const newRankedUsers = this.getRankedUsers(
 				guildData,
