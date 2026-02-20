@@ -247,7 +247,8 @@ class AmuletUtil {
 			if (!gameState?.amulet.lastTransferred) return;
 
 			// Calculate time held
-			const timeHeld = Date.now() - gameState.amulet.lastTransferred.getTime();
+			const timeHeld =
+				Date.now() - new Date(gameState.amulet.lastTransferred).getTime();
 
 			// Update user stats
 			const newLongestHold = Math.max(
