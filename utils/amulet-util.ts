@@ -476,7 +476,14 @@ class AmuletUtil {
 
 			if (remainingTime <= 0) {
 				console.log(`Amulet expired for guild ${guildId} during downtime`);
-				await this.clearAmulet(currentHolderId, channelId, guildId, true);
+				try {
+					await this.clearAmulet(currentHolderId, channelId, guildId, true);
+				} catch (error) {
+					console.error(
+						`Failed to clear expired amulet for guild ${guildId}:`,
+						error,
+					);
+				}
 			} else {
 				console.log(
 					`Restoring timeout for guild ${guildId}: ${Math.round(remainingTime / 1000 / 60)}min remaining`,
