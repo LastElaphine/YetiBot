@@ -5,6 +5,7 @@ import { initializeAmuletUtil } from "./utils/amulet-util.ts";
 import { ChannelHelper } from "./utils/channel-helper.ts";
 import { DatabaseManager } from "./utils/database-manager.ts";
 import { logger } from "./utils/logger.ts";
+import { getWebConfig, startWebServer } from "./web/server.ts";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -19,6 +20,11 @@ logger.info("Commands loaded", {
 	commandCount: commands.size,
 	commands: commands.map((value: Command) => value.data.name),
 });
+
+const webConfig = getWebConfig();
+if (webConfig.enabled) {
+	startWebServer();
+}
 
 client.once(Events.ClientReady, (readyClient) => {
 	logger.info("Bot ready", {
