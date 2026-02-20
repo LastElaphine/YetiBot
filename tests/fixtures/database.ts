@@ -25,6 +25,9 @@ export function createTestUserProfile(
 		stats: {
 			amuletHeldCount: 5,
 			amuletHeldTimeMs: 300000,
+			longestHoldTimeMs: 120000,
+			passesGiven: 3,
+			passesReceived: 5,
 			gamesPlayed: 10,
 			commandUses: new Map([
 				["amulet", 3],
@@ -115,6 +118,9 @@ export function createTestGuildDatabase(
 			stats: {
 				amuletHeldCount: 3,
 				amuletHeldTimeMs: 180000,
+				longestHoldTimeMs: 90000,
+				passesGiven: 2,
+				passesReceived: 3,
 				gamesPlayed: 7,
 				commandUses: new Map(),
 			},
@@ -128,6 +134,9 @@ export function createTestGuildDatabase(
 			stats: {
 				amuletHeldCount: 2,
 				amuletHeldTimeMs: 60000,
+				longestHoldTimeMs: 40000,
+				passesGiven: 1,
+				passesReceived: 2,
 				gamesPlayed: 4,
 				commandUses: new Map(),
 			},
