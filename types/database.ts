@@ -1,3 +1,13 @@
+export interface StatsSnapshot {
+	timestamp: Date;
+	amuletHeldCount: number;
+	amuletHeldTimeMs: number;
+	longestHoldTimeMs: number;
+	passesGiven: number;
+	passesReceived: number;
+	gamesPlayed: number;
+}
+
 export interface UserProfile {
 	id: string; // Discord user ID
 	username: string; // Discord username
@@ -14,6 +24,7 @@ export interface UserProfile {
 		gamesPlayed: number; // Total games participated in this guild
 		commandUses: Map<string, number>; // Command usage counts
 	};
+	statsHistory: StatsSnapshot[]; // Historical snapshots for trends
 	preferences: {
 		notifications: boolean; // DM notifications enabled
 		timezone?: string; // User timezone (optional)

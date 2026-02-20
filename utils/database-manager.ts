@@ -5,6 +5,7 @@ import type {
 	GuildDatabase,
 	GuildGameState,
 	LeaderboardEntry,
+	StatsSnapshot,
 	UserProfile,
 } from "../types/database.ts";
 import { AtomicJSONFile } from "./atomic-json-adapter.ts";
@@ -178,6 +179,7 @@ class DatabaseManager {
 					gamesPlayed: 0,
 					commandUses: new Map(),
 				},
+				statsHistory: [],
 				preferences: {
 					notifications: true,
 				},
@@ -341,6 +343,32 @@ class DatabaseManager {
 		score: number,
 	): Promise<void> {
 		await this.updateLeaderboard(guildId, category, userId, username, score);
+	}
+
+	async recordStatsSnapshot(userId: string, guildId: string): Promise<void> {
+		const userProfile = await this.getUserProfile(userId, guildId);
+		if (!userProfile) return;
+
+		const snapshot: StatsSnapshot = {
+			timestamp: new Date(),
+			amuletHeldCount: userProfile.stats.amuletHeldCount,
+			amuletHeldTimeMs: userProfile.stats.amuletHeldTimeMs,
+			longestHoldTimeMs: userProfile.stats.longestHoldTimeMs,
+			passesGiven: userProfile.stats.passesGiven,
+			passesReceived: userProfile.stats.passesReceived,
+			gamesPlayed: userProfile.stats.gamesPlayed,
+		};
+
+		userProfile.statsHistory.push(snapshot);
+		await this.createOrUpdateUserProfile(userId, guildId, {});
+	}
+
+	async getStatsHistory(
+		userId: string,
+		guildId: string,
+	): Promise<StatsSnapshot[]> {
+		const userProfile = await this.getUserProfile(userId, guildId);
+		return userProfile?.statsHistory || [];
 	}
 
 	private async safeWrite(): Promise<void> {
