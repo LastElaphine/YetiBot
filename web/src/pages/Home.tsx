@@ -7,6 +7,16 @@ interface Guild {
 	totalUsers: number;
 }
 
+function LoadingSkeleton() {
+	return (
+		<div className="loading">
+			<div className="skeleton skeleton-card" />
+			<div className="skeleton skeleton-card" />
+			<div className="skeleton skeleton-card" />
+		</div>
+	);
+}
+
 export default function Home() {
 	const [guilds, setGuilds] = useState<Guild[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -32,9 +42,13 @@ export default function Home() {
 				<section>
 					<h2>Servers</h2>
 					{loading ? (
-						<p>Loading...</p>
+						<LoadingSkeleton />
 					) : guilds.length === 0 ? (
-						<p>No servers found</p>
+						<div className="empty-state">
+							<div className="empty-state-icon">🎮</div>
+							<h3>No servers found</h3>
+							<p>Servers using YetiBot will appear here</p>
+						</div>
 					) : (
 						<div className="servers-grid">
 							{guilds.map((guild) => (
@@ -43,8 +57,16 @@ export default function Home() {
 									to={`/guilds/${guild.id}`}
 									className="server-card"
 								>
-									<h3>{guild.name}</h3>
-									<p>{guild.totalUsers} users</p>
+									<div className="server-card-header">
+										<div className="server-icon">⚡</div>
+										<div>
+											<h3>{guild.name}</h3>
+											<p>
+												<span className="user-count">{guild.totalUsers}</span>{" "}
+												users
+											</p>
+										</div>
+									</div>
 								</Link>
 							))}
 						</div>
