@@ -8,16 +8,6 @@ interface GuildData {
 	leaderboard: Array<{ userId: string; username: string; score: number }>;
 }
 
-function LoadingSkeleton() {
-	return (
-		<div className="loading">
-			<div className="skeleton skeleton-row" />
-			<div className="skeleton skeleton-row" />
-			<div className="skeleton skeleton-row" />
-		</div>
-	);
-}
-
 export default function GuildDetail() {
 	const { id } = useParams<{ id: string }>();
 	const [guild, setGuild] = useState<GuildData | null>(null);
@@ -37,15 +27,17 @@ export default function GuildDetail() {
 
 	if (loading) {
 		return (
-			<div className="app">
-				<header>
-					<h1>YetiBot Dashboard</h1>
-				</header>
-				<main>
-					<Link to="/" className="back-link">
+			<div className="min-vh-100 bg-dark-custom">
+				<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+					<div className="container">
+						<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
+					</div>
+				</nav>
+				<main className="container py-4">
+					<Link to="/" className="text-decoration-none text-secondary">
 						← Back
 					</Link>
-					<LoadingSkeleton />
+					<div className="text-center text-secondary mt-4">Loading...</div>
 				</main>
 			</div>
 		);
@@ -53,97 +45,86 @@ export default function GuildDetail() {
 
 	if (!guild) {
 		return (
-			<div className="app">
-				<header>
-					<h1>YetiBot Dashboard</h1>
-				</header>
-				<main>
-					<Link to="/" className="back-link">
+			<div className="min-vh-100 bg-dark-custom">
+				<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+					<div className="container">
+						<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
+					</div>
+				</nav>
+				<main className="container py-4">
+					<Link to="/" className="text-decoration-none text-secondary">
 						← Back
 					</Link>
-					<div className="empty-state">
-						<div className="empty-state-icon">🔍</div>
-						<h3>Guild not found</h3>
-						<p>This server doesn't exist or isn't using YetiBot</p>
+					<div className="text-center text-secondary py-5">
+						<p>Guild not found</p>
 					</div>
 				</main>
 			</div>
 		);
 	}
 
-	const getRankClass = (index: number) => {
-		if (index === 0) return "rank-1";
-		if (index === 1) return "rank-2";
-		if (index === 2) return "rank-3";
-		return "rank-other";
-	};
-
 	return (
-		<div className="app">
-			<header>
-				<h1>YetiBot Dashboard</h1>
-			</header>
-			<main>
-				<Link to="/" className="back-link">
+		<div className="min-vh-100 bg-dark-custom">
+			<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+				<div className="container">
+					<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
+				</div>
+			</nav>
+			<main className="container py-4">
+				<Link
+					to="/"
+					className="text-decoration-none text-secondary d-block mb-4"
+				>
 					← Back
 				</Link>
-				<div className="guild-detail">
-					<header>
-						<h1>{guild.name}</h1>
-					</header>
-					<section>
-						<h2>Stats</h2>
-						<div className="stats-grid">
-							<div className="stat-card">
-								<div className="stat-icon">👥</div>
-								<div className="stat-info">
-									<h4>Total Users</h4>
-									<p>{guild.totalUsers}</p>
-								</div>
-							</div>
-							<div className="stat-card">
-								<div className="stat-icon">🏆</div>
-								<div className="stat-info">
-									<h4>Leaderboard Entries</h4>
-									<p>{guild.leaderboard?.length || 0}</p>
-								</div>
+				<h2 className="mb-4">{guild.name}</h2>
+				<div className="row g-4 mb-4">
+					<div className="col-md-6">
+						<div className="card">
+							<div className="card-body">
+								<h5 className="card-title text-secondary">Total Users</h5>
+								<p className="card-text display-4">{guild.totalUsers}</p>
 							</div>
 						</div>
-					</section>
-					<section>
-						<h2>Leaderboard</h2>
-						{guild.leaderboard?.length === 0 ? (
-							<div className="empty-state">
-								<div className="empty-state-icon">📊</div>
-								<h3>No leaderboard data</h3>
-								<p>Players will appear here once they start playing</p>
+					</div>
+					<div className="col-md-6">
+						<div className="card">
+							<div className="card-body">
+								<h5 className="card-title text-secondary">
+									Leaderboard Entries
+								</h5>
+								<p className="card-text display-4">
+									{guild.leaderboard?.length || 0}
+								</p>
 							</div>
-						) : (
-							<table className="leaderboard">
-								<thead>
-									<tr>
-										<th>Rank</th>
-										<th>User</th>
-										<th>Score</th>
-									</tr>
-								</thead>
-								<tbody>
-									{guild.leaderboard?.map((entry, index) => (
-										<tr key={entry.userId}>
-											<td>
-												<span className={`rank ${getRankClass(index)}`}>
-													{index + 1}
-												</span>
-											</td>
-											<td>{entry.username}</td>
-											<td className="score">{entry.score}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						)}
-					</section>
+						</div>
+					</div>
 				</div>
+				<h3 className="mb-3">Leaderboard</h3>
+				{guild.leaderboard?.length === 0 ? (
+					<div className="text-center text-secondary py-4">
+						<p>No leaderboard data</p>
+					</div>
+				) : (
+					<table className="table table-dark table-striped">
+						<thead>
+							<tr>
+								<th>Rank</th>
+								<th>User</th>
+								<th>Score</th>
+							</tr>
+						</thead>
+						<tbody>
+							{guild.leaderboard?.map((entry, index) => (
+								<tr key={entry.userId}>
+									<td>{index + 1}</td>
+									<td>{entry.username}</td>
+									<td>{entry.score}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				)}
 			</main>
 		</div>
 	);

@@ -7,16 +7,6 @@ interface Guild {
 	totalUsers: number;
 }
 
-function LoadingSkeleton() {
-	return (
-		<div className="loading">
-			<div className="skeleton skeleton-card" />
-			<div className="skeleton skeleton-card" />
-			<div className="skeleton skeleton-card" />
-		</div>
-	);
-}
-
 export default function Home() {
 	const [guilds, setGuilds] = useState<Guild[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -34,44 +24,41 @@ export default function Home() {
 	}, []);
 
 	return (
-		<div className="app">
-			<header>
-				<h1>YetiBot Dashboard</h1>
-			</header>
-			<main>
-				<section>
-					<h2>Servers</h2>
-					{loading ? (
-						<LoadingSkeleton />
-					) : guilds.length === 0 ? (
-						<div className="empty-state">
-							<div className="empty-state-icon">🎮</div>
-							<h3>No servers found</h3>
-							<p>Servers using YetiBot will appear here</p>
-						</div>
-					) : (
-						<div className="servers-grid">
-							{guilds.map((guild) => (
+		<div className="min-vh-100 bg-dark-custom">
+			<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+				<div className="container">
+					<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
+				</div>
+			</nav>
+			<main className="container py-4">
+				<h2 className="mb-4">Servers</h2>
+				{loading ? (
+					<div className="text-center text-secondary">Loading...</div>
+				) : guilds.length === 0 ? (
+					<div className="text-center text-secondary py-5">
+						<p>No servers found</p>
+					</div>
+				) : (
+					<div className="row g-4">
+						{guilds.map((guild) => (
+							<div key={guild.id} className="col-md-6 col-lg-4">
 								<Link
-									key={guild.id}
 									to={`/guilds/${guild.id}`}
-									className="server-card"
+									className="text-decoration-none"
 								>
-									<div className="server-card-header">
-										<div className="server-icon">⚡</div>
-										<div>
-											<h3>{guild.name}</h3>
-											<p>
-												<span className="user-count">{guild.totalUsers}</span>{" "}
-												users
+									<div className="card h-100">
+										<div className="card-body">
+											<h5 className="card-title text-white">{guild.name}</h5>
+											<p className="card-text text-secondary">
+												{guild.totalUsers} users
 											</p>
 										</div>
 									</div>
 								</Link>
-							))}
-						</div>
-					)}
-				</section>
+							</div>
+						))}
+					</div>
+				)}
 			</main>
 		</div>
 	);
