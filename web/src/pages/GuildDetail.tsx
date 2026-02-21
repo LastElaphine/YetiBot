@@ -17,10 +17,6 @@ interface GuildData {
 	users: GuildUser[];
 }
 
-function getAvatarUrl(userId: string) {
-	return `https://cdn.discordapp.com/avatars/${userId}/placeholder.png?size=64`;
-}
-
 function formatTime(ms: number): string {
 	const seconds = Math.floor(ms / 1000);
 	const minutes = Math.floor(seconds / 60);
@@ -96,61 +92,33 @@ export default function GuildDetail() {
 				<Link to="/" className="text-decoration-none text-muted d-block mb-4">
 					← Back
 				</Link>
-				<div className="d-flex align-items-center gap-3 mb-4">
-					<div
-						className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
-						style={{ width: 64, height: 64 }}
-					>
-						<span className="text-white fs-4">🏠</span>
-					</div>
-					<div>
-						<h2 className="mb-0">{guild.name}</h2>
-						<small className="text-muted">{guild.totalUsers} members</small>
-					</div>
-				</div>
-				<h3 className="mb-3">Users ({(guild.users ?? []).length})</h3>
+				<h2 className="mb-4">{guild.name}</h2>
+				<h3 className="mb-3">Users</h3>
 				{(guild.users ?? []).length === 0 ? (
 					<div className="text-center text-muted py-4">
 						<p>No users yet</p>
 					</div>
 				) : (
-					<div className="table-responsive">
-						<table className="table table-striped">
-							<thead>
-								<tr>
-									<th>User</th>
-									<th>Amulet Holds</th>
-									<th>Time Held</th>
-									<th>Games Played</th>
+					<table className="table table-striped">
+						<thead>
+							<tr>
+								<th>User</th>
+								<th>Holds</th>
+								<th>Time</th>
+								<th>Games</th>
+							</tr>
+						</thead>
+						<tbody>
+							{(guild.users ?? []).map((user) => (
+								<tr key={user.id}>
+									<td>{user.displayName || user.username}</td>
+									<td>{user.amuletHeldCount}</td>
+									<td>{formatTime(user.amuletHeldTimeMs)}</td>
+									<td>{user.gamesPlayed}</td>
 								</tr>
-							</thead>
-							<tbody>
-								{(guild.users ?? []).map((user) => (
-									<tr key={user.id}>
-										<td>
-											<div className="d-flex align-items-center gap-2">
-												<img
-													src={getAvatarUrl(user.id)}
-													alt={user.username}
-													className="rounded-circle"
-													width={32}
-													height={32}
-													onError={(e) => {
-														const target = e.target as HTMLImageElement;
-														target.style.display = "none";
-													}}
-												/>
-												<span>{user.displayName || user.username}</span>
-											</div>
-										</td>
-										<td>{user.amuletHeldCount}</td>
-										<td>{formatTime(user.amuletHeldTimeMs)}</td>
-										<td>{user.gamesPlayed}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
+							))}
+						</tbody>
+					</table>
 				)}
 			</main>
 		</div>
