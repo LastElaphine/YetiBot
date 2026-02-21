@@ -35,12 +35,53 @@ async function getGuilds(): Promise<Guild[]> {
 	}));
 }
 
+async function getGuild(id: string): Promise<Guild | null> {
+	await db.read();
+	const guildData = db.data?.guilds?.get(id);
+	if (!guildData) return null;
+
+	const data = guildData as {
+		metadata?: { totalUsers?: number };
+		leaderboards?: {
+			"amulet-count"?: Map<string, number>;
+		};
+	};
+
+	const leaderboard = Array.from(
+		data.leaderboards?.["amulet-count"]?.entries() ?? [],
+	)
+		.map(([userId, score]) => ({ userId, score, username: `User ${userId}` }))
+		.sort((a, b) => b.score - a.score)
+		.slice(0, 10);
+
+	return {
+		id,
+		name: `Server ${id}`,
+		totalUsers: data.metadata?.totalUsers ?? 0,
+		leaderboard,
+	};
+}
+
 const server = Deno.serve({ port: 3000 }, async (req) => {
 	const url = new URL(req.url);
 
 	if (url.pathname === "/api/guilds") {
 		const guilds = await getGuilds();
 		return new Response(JSON.stringify({ guilds }), {
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+
+	const guildMatch = url.pathname.match(/^\/api\/guilds\/([^/]+)$/);
+	if (guildMatch) {
+		const guild = await getGuild(guildMatch[1]);
+		if (!guild) {
+			return new Response(JSON.stringify({ guild: null }), {
+				status: 404,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+		return new Response(JSON.stringify({ guild }), {
 			headers: { "Content-Type": "application/json" },
 		});
 	}

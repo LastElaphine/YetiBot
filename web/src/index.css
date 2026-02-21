@@ -69,3 +69,41 @@ h2 {
 	color: #888;
 	font-size: 0.9rem;
 }
+
+.back-link {
+	color: #e94560;
+	text-decoration: none;
+	display: inline-block;
+	margin-bottom: 1rem;
+}
+
+.back-link:hover {
+	text-decoration: underline;
+}
+
+.guild-detail header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.leaderboard {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.leaderboard th,
+.leaderboard td {
+	padding: 0.75rem;
+	text-align: left;
+	border-bottom: 1px solid #0f3460;
+}
+
+.leaderboard th {
+	color: #e94560;
+	background: #16213e;
+}
+
+.leaderboard td {
+	color: #eee;
+}
