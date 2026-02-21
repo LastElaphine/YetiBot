@@ -24,8 +24,8 @@ export default function Home() {
 	}, []);
 
 	return (
-		<div className="min-vh-100 bg-dark-custom">
-			<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+		<div className="min-vh-100">
+			<nav className="navbar navbar-light bg-light border-bottom">
 				<div className="container">
 					<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
 				</div>
@@ -35,7 +35,7 @@ export default function Home() {
 				{loading ? (
 					<div className="text-center text-secondary">Loading...</div>
 				) : guilds.length === 0 ? (
-					<div className="text-center text-secondary py-5">
+					<div className="text-center text-muted py-5">
 						<p>No servers found</p>
 					</div>
 				) : (

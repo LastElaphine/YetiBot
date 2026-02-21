@@ -27,17 +27,17 @@ export default function GuildDetail() {
 
 	if (loading) {
 		return (
-			<div className="min-vh-100 bg-dark-custom">
-				<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+			<div className="min-vh-100">
+				<nav className="navbar navbar-light bg-light border-bottom">
 					<div className="container">
 						<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
 					</div>
 				</nav>
 				<main className="container py-4">
-					<Link to="/" className="text-decoration-none text-secondary">
+					<Link to="/" className="text-decoration-none text-muted d-block mb-4">
 						← Back
 					</Link>
-					<div className="text-center text-secondary mt-4">Loading...</div>
+					<div className="text-center text-muted mt-4">Loading...</div>
 				</main>
 			</div>
 		);
@@ -45,17 +45,17 @@ export default function GuildDetail() {
 
 	if (!guild) {
 		return (
-			<div className="min-vh-100 bg-dark-custom">
-				<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+			<div className="min-vh-100">
+				<nav className="navbar navbar-light bg-light border-bottom">
 					<div className="container">
 						<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
 					</div>
 				</nav>
 				<main className="container py-4">
-					<Link to="/" className="text-decoration-none text-secondary">
+					<Link to="/" className="text-decoration-none text-muted">
 						← Back
 					</Link>
-					<div className="text-center text-secondary py-5">
+					<div className="text-center text-muted py-5">
 						<p>Guild not found</p>
 					</div>
 				</main>
@@ -64,17 +64,14 @@ export default function GuildDetail() {
 	}
 
 	return (
-		<div className="min-vh-100 bg-dark-custom">
-			<nav className="navbar navbar-dark bg-dark border-bottom border-secondary">
+		<div className="min-vh-100">
+			<nav className="navbar navbar-light bg-light border-bottom">
 				<div className="container">
 					<span className="navbar-brand mb-0 h1">YetiBot Dashboard</span>
 				</div>
 			</nav>
 			<main className="container py-4">
-				<Link
-					to="/"
-					className="text-decoration-none text-secondary d-block mb-4"
-				>
+				<Link to="/" className="text-decoration-none text-muted d-block mb-4">
 					← Back
 				</Link>
 				<h2 className="mb-4">{guild.name}</h2>
@@ -82,7 +79,7 @@ export default function GuildDetail() {
 					<div className="col-md-6">
 						<div className="card">
 							<div className="card-body">
-								<h5 className="card-title text-secondary">Total Users</h5>
+								<h5 className="card-title text-muted">Total Users</h5>
 								<p className="card-text display-4">{guild.totalUsers}</p>
 							</div>
 						</div>
@@ -90,9 +87,7 @@ export default function GuildDetail() {
 					<div className="col-md-6">
 						<div className="card">
 							<div className="card-body">
-								<h5 className="card-title text-secondary">
-									Leaderboard Entries
-								</h5>
+								<h5 className="card-title text-muted">Leaderboard Entries</h5>
 								<p className="card-text display-4">
 									{guild.leaderboard?.length || 0}
 								</p>
@@ -102,11 +97,11 @@ export default function GuildDetail() {
 				</div>
 				<h3 className="mb-3">Leaderboard</h3>
 				{guild.leaderboard?.length === 0 ? (
-					<div className="text-center text-secondary py-4">
+					<div className="text-center text-muted py-4">
 						<p>No leaderboard data</p>
 					</div>
 				) : (
-					<table className="table table-dark table-striped">
+					<table className="table table-striped">
 						<thead>
 							<tr>
 								<th>Rank</th>

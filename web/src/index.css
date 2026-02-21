@@ -1,38 +1,3 @@
 body {
-	background: #0f0f1a;
-	color: #fff;
 	min-height: 100vh;
-}
-
-.bg-dark-custom {
-	background: #1a1a2e;
-}
-
-.card {
-	background: #16213e;
-	border: 1px solid #0f3460;
-}
-
-.card:hover {
-	border-color: #e94560;
-}
-
-.btn-primary {
-	background: #e94560;
-	border-color: #e94560;
-}
-
-.btn-primary:hover {
-	background: #d63d56;
-	border-color: #d63d56;
-}
-
-.table {
-	--bs-table-bg: #16213e;
-	--bs-table-color: #fff;
-	--bs-table-border-color: #0f3460;
-}
-
-.table th {
-	color: #e94560;
 }
