@@ -57,7 +57,9 @@ async function getGuild(id: string): Promise<Guild | null> {
 		users?: Map<string, UserProfile>;
 	};
 
-	const users: GuildUser[] = Array.from(data.users?.entries() ?? [])
+	const users: GuildUser[] = Array.from(
+		(data.users as Map<string, UserProfile>)?.entries() ?? [],
+	)
 		.map(([userId, profile]) => ({
 			id: userId,
 			username: profile.username,
