@@ -1,13 +1,23 @@
 import { Low } from "npm:lowdb";
-import type { DatabaseSchema } from "./types/database.ts";
+import type { DatabaseSchema, UserProfile } from "./types/database.ts";
 import { AtomicJSONFile } from "./utils/atomic-json-adapter.ts";
 import { paths } from "./utils/path-config.ts";
+
+interface GuildUser {
+	id: string;
+	username: string;
+	displayName?: string;
+	amuletHeldCount: number;
+	amuletHeldTimeMs: number;
+	gamesPlayed: number;
+}
 
 interface Guild {
 	id: string;
 	name: string;
+	icon?: string;
 	totalUsers: number;
-	leaderboard?: Array<{ userId: string; username: string; score: number }>;
+	users: GuildUser[];
 }
 
 const adapter = new AtomicJSONFile<DatabaseSchema>(paths.dbFile);
@@ -33,6 +43,7 @@ async function getGuilds(): Promise<Guild[]> {
 		totalUsers:
 			(data as { metadata?: { totalUsers?: number } }).metadata?.totalUsers ??
 			0,
+		users: [],
 	}));
 }
 
@@ -43,27 +54,29 @@ async function getGuild(id: string): Promise<Guild | null> {
 
 	const data = guildData as {
 		metadata?: { totalUsers?: number };
-		leaderboards?: {
-			"amulet-count"?: Map<string, number>;
-		};
+		users?: Map<string, UserProfile>;
 	};
 
-	const leaderboard = Array.from(
-		data.leaderboards?.["amulet-count"]?.entries() ?? [],
-	)
-		.map(([userId, score]) => ({ userId, score, username: `User ${userId}` }))
-		.sort((a, b) => b.score - a.score)
-		.slice(0, 10);
+	const users: GuildUser[] = Array.from(data.users?.entries() ?? [])
+		.map(([userId, profile]) => ({
+			id: userId,
+			username: profile.username,
+			displayName: profile.displayName,
+			amuletHeldCount: profile.stats?.amuletHeldCount ?? 0,
+			amuletHeldTimeMs: profile.stats?.amuletHeldTimeMs ?? 0,
+			gamesPlayed: profile.stats?.gamesPlayed ?? 0,
+		}))
+		.sort((a, b) => b.amuletHeldCount - a.amuletHeldCount);
 
 	return {
 		id,
 		name: `Server ${id}`,
 		totalUsers: data.metadata?.totalUsers ?? 0,
-		leaderboard,
+		users,
 	};
 }
 
-const server = Deno.serve({ port: 3000 }, async (req) => {
+const _server = Deno.serve({ port: 3000 }, async (req) => {
 	const start = Date.now();
 	const url = new URL(req.url);
 
