@@ -108,8 +108,8 @@ export default function GuildDetail() {
 						<small className="text-muted">{guild.totalUsers} members</small>
 					</div>
 				</div>
-				<h3 className="mb-3">Users ({guild.users.length})</h3>
-				{guild.users.length === 0 ? (
+				<h3 className="mb-3">Users ({(guild.users ?? []).length})</h3>
+				{(guild.users ?? []).length === 0 ? (
 					<div className="text-center text-muted py-4">
 						<p>No users yet</p>
 					</div>
@@ -125,7 +125,7 @@ export default function GuildDetail() {
 								</tr>
 							</thead>
 							<tbody>
-								{guild.users.map((user) => (
+								{(guild.users ?? []).map((user) => (
 									<tr key={user.id}>
 										<td>
 											<div className="d-flex align-items-center gap-2">
