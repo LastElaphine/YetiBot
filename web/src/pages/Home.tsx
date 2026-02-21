@@ -48,7 +48,7 @@ export default function Home() {
 								>
 									<div className="card h-100">
 										<div className="card-body">
-											<h5 className="card-title text-white">{guild.name}</h5>
+											<h5 className="card-title">{guild.name}</h5>
 											<p className="card-text text-secondary">
 												{guild.totalUsers} users
 											</p>
