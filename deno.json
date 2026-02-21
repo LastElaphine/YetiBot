@@ -1,5 +1,7 @@
 {
 	"tasks": {
+		"dev:web": "cd web && deno run -A npm:vite",
+		"build:web": "cd web && deno run -A npm:vite build",
 		"dev": "deno run --allow-all --watch main.ts",
 		"deploy-dev-commands": "deno run --allow-all deploy-commands.ts",
 		"lint": "deno run -A npm:@biomejs/biome check",
