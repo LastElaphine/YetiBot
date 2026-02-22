@@ -112,9 +112,12 @@ class VoiceHandler {
 			});
 
 			const filepath = soundUtil.getSoundPath(guildId, filename);
+			console.log("Playing sound from:", filepath);
+
 			const player = createAudioPlayer();
 			const resource = createAudioResource(filepath);
 
+			console.log("Resource created, playing...");
 			player.play(resource);
 			connection.subscribe(player);
 
