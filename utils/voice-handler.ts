@@ -1,3 +1,10 @@
+import {
+	AudioPlayerStatus,
+	createAudioPlayer,
+	createAudioResource,
+	joinVoiceChannel,
+	type VoiceConnection,
+} from "@discordjs/voice";
 import { type Client, Events, type VoiceState } from "discord";
 import { DatabaseManager } from "./database-manager.ts";
 import { logger } from "./logger.ts";
@@ -5,6 +12,7 @@ import { logger } from "./logger.ts";
 class VoiceHandler {
 	private static instance: VoiceHandler;
 	private client: Client;
+	private connections: Map<string, VoiceConnection> = new Map();
 
 	private constructor(client: Client) {
 		this.client = client;
@@ -91,34 +99,44 @@ class VoiceHandler {
 				return false;
 			}
 
-			if (guild.voice) {
-				guild.voice.disconnect();
+			const existingConnection = this.connections.get(guildId);
+			if (existingConnection) {
+				existingConnection.destroy();
 			}
 
-			const connection = await (channel as any).join();
-
-			const dispatcher = connection.play(soundUrl, {
-				volume: 0.5,
+			const connection = joinVoiceChannel({
+				channelId: channel.id,
+				guildId: guild.id,
+				adapterCreator: guild.voiceAdapterCreator,
 			});
 
-			dispatcher.on("finish", () => {
+			this.connections.set(guildId, connection);
+
+			const player = createAudioPlayer();
+			const resource = createAudioResource(soundUrl);
+
+			player.play(resource);
+			connection.subscribe(player);
+
+			player.on(AudioPlayerStatus.Idle, () => {
 				logger.debug("Audio finished, disconnecting", { guildId });
 				setTimeout(() => {
-					(channel as any).leave();
+					connection.destroy();
+					this.connections.delete(guildId);
 				}, 1000);
 			});
 
-			dispatcher.on("error", (error: Error) => {
-				console.error("Dispatcher error:", error);
-				(channel as any).leave();
+			player.on("error", (error) => {
+				console.error("Player error:", error);
+				connection.destroy();
+				this.connections.delete(guildId);
 			});
 
 			setTimeout(() => {
-				try {
-					if ((channel as any).connection) {
-						(channel as any).leave();
-					}
-				} catch {}
+				if (this.connections.has(guildId)) {
+					connection.destroy();
+					this.connections.delete(guildId);
+				}
 			}, 30000);
 
 			return true;
@@ -129,15 +147,15 @@ class VoiceHandler {
 	}
 
 	public async stopSound(guildId: string): Promise<void> {
-		const guild = this.client.guilds.cache.get(guildId);
-		if (guild && guild.voice) {
-			guild.voice.disconnect();
+		const connection = this.connections.get(guildId);
+		if (connection) {
+			connection.destroy();
+			this.connections.delete(guildId);
 		}
 	}
 
 	public isPlaying(guildId: string): boolean {
-		const guild = this.client.guilds.cache.get(guildId);
-		return guild?.voice?.connection?.dispatcher !== undefined;
+		return this.connections.has(guildId);
 	}
 }
 
