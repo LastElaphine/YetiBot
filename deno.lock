@@ -262,8 +262,6 @@
       "jsr:@std/log@0.224",
       "jsr:@std/path@1",
       "npm:@biomejs/biome@^2.2.4",
-      "npm:@discordjs/opus@0.9.0",
-      "npm:@discordjs/voice@0.16.0",
       "npm:discord.js@^14.22.1",
       "npm:lowdb@^7.0.1",
       "npm:zod@^3.24.1"
