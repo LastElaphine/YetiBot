@@ -23,9 +23,13 @@ class SoundUtil {
 	}
 
 	public isValidSoundFile(
-		filename: string,
+		filename: string | undefined,
 		fileSize: number,
 	): { valid: boolean; error?: string } {
+		if (!filename || typeof filename !== "string") {
+			return { valid: false, error: "Invalid filename" };
+		}
+
 		const ext = filename.toLowerCase().slice(filename.lastIndexOf("."));
 
 		if (!ALLOWED_EXTENSIONS.includes(ext)) {
