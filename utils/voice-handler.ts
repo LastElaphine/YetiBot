@@ -14,6 +14,7 @@ class VoiceHandler {
 		if (!VoiceHandler.instance) {
 			VoiceHandler.instance = new VoiceHandler(client);
 			VoiceHandler.instance.setupEventListeners();
+			voiceHandlerInstance = VoiceHandler.instance;
 		}
 		return VoiceHandler.instance;
 	}
