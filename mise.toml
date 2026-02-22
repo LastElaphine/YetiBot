@@ -3,8 +3,8 @@ node = "22"
 
 [tasks]
 dev = "npm run dev"
-"dev:web" = "cd web && npm run dev"
-"build:web" = "cd web && npm run build"
+"dev:web" = "npm run dev --prefix web"
+"build:web" = "npm run build --prefix web"
 "dev:api" = "npm run dev:api"
 deploy-dev-commands = "npm run deploy-commands"
 lint = "npm run lint"
