@@ -322,7 +322,14 @@ class DatabaseManager {
 		if (!guildData || !guildData.sounds) {
 			return null;
 		}
-		return guildData.sounds.sounds.get(soundId) || null;
+
+		const exact = guildData.sounds.sounds.get(soundId);
+		if (exact) return exact;
+
+		const partial = Array.from(guildData.sounds.sounds.values()).find((s) =>
+			s.id.startsWith(soundId),
+		);
+		return partial || null;
 	}
 
 	async deleteSound(guildId: string, soundId: string): Promise<boolean> {
@@ -331,7 +338,12 @@ class DatabaseManager {
 			return false;
 		}
 
-		const deleted = guildData.sounds.sounds.delete(soundId);
+		const sound = await this.getSound(guildId, soundId);
+		if (!sound) {
+			return false;
+		}
+
+		const deleted = guildData.sounds.sounds.delete(sound.id);
 		if (deleted) {
 			if (guildData.sounds.defaultSoundId === soundId) {
 				guildData.sounds.defaultSoundId = null;
@@ -348,12 +360,12 @@ class DatabaseManager {
 			return false;
 		}
 
-		const sound = guildData.sounds.sounds.get(soundId);
+		const sound = await this.getSound(guildId, soundId);
 		if (!sound) {
 			return false;
 		}
 
-		guildData.sounds.defaultSoundId = soundId;
+		guildData.sounds.defaultSoundId = sound.id;
 		this.db.data.globalMetadata.updatedAt = new Date();
 		await this.safeWrite();
 		return true;

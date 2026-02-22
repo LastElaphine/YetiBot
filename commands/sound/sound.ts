@@ -69,8 +69,8 @@ class Sound extends Command {
 					.addStringOption((option) =>
 						option
 							.setName("id")
-							.setDescription("Sound ID to play (or empty for default)")
-							.setRequired(false),
+							.setDescription("Sound ID to play")
+							.setRequired(true),
 					),
 			);
 	}
