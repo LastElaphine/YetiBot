@@ -67,13 +67,13 @@ Deno.test("createSoundClip creates valid object", () => {
 	const clip = soundUtil.createSoundClip(
 		"test-id",
 		"My Sound",
-		"https://cdn.discordapp.com/sound.mp3",
+		"sound.mp3",
 		"user123",
 		1024,
 	);
 	assertEquals(clip.id, "test-id");
 	assertEquals(clip.name, "My Sound");
-	assertEquals(clip.url, "https://cdn.discordapp.com/sound.mp3");
+	assertEquals(clip.filename, "sound.mp3");
 	assertEquals(clip.uploadedBy, "user123");
 	assertEquals(clip.fileSize, 1024);
 	assertExists(clip.uploadedAt);

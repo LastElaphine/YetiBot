@@ -8,6 +8,7 @@ import {
 import { type Client, Events, type VoiceState } from "discord";
 import { DatabaseManager } from "./database-manager.ts";
 import { logger } from "./logger.ts";
+import { soundUtil } from "./sound-util.ts";
 
 class VoiceHandler {
 	private static instance: VoiceHandler;
@@ -63,7 +64,7 @@ class VoiceHandler {
 			const defaultSound = await dbManager.getDefaultSound(guildId);
 			if (!defaultSound) return;
 
-			await this.playSound(guildId, channelId, defaultSound.url);
+			await this.playSound(guildId, channelId, defaultSound.filename);
 
 			logger.info("Playing join sound", {
 				guildId,
@@ -84,7 +85,7 @@ class VoiceHandler {
 	public async playSound(
 		guildId: string,
 		channelId: string,
-		soundUrl: string,
+		filename: string,
 	): Promise<boolean> {
 		try {
 			const guild = this.client.guilds.cache.get(guildId);
@@ -110,10 +111,9 @@ class VoiceHandler {
 				adapterCreator: guild.voiceAdapterCreator,
 			});
 
-			this.connections.set(guildId, connection);
-
+			const filepath = soundUtil.getSoundPath(guildId, filename);
 			const player = createAudioPlayer();
-			const resource = createAudioResource(soundUrl);
+			const resource = createAudioResource(filepath);
 
 			player.play(resource);
 			connection.subscribe(player);

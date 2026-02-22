@@ -1,8 +1,11 @@
 import { randomUUID } from "node:crypto";
+import { resolve } from "@std/path";
 import type { SoundClip } from "../types/database.ts";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_EXTENSIONS = [".mp3", ".wav", ".ogg", ".flac", ".m4a"];
+
+const SOUNDS_DIR = resolve(Deno.cwd(), "data", "sounds");
 
 class SoundUtil {
 	private static instance: SoundUtil;
@@ -14,6 +17,14 @@ class SoundUtil {
 			SoundUtil.instance = new SoundUtil();
 		}
 		return SoundUtil.instance;
+	}
+
+	public async ensureSoundDir(guildId: string): Promise<void> {
+		await Deno.mkdir(resolve(SOUNDS_DIR, guildId), { recursive: true });
+	}
+
+	public getSoundPath(guildId: string, filename: string): string {
+		return resolve(SOUNDS_DIR, guildId, filename);
 	}
 
 	public generateSoundId(): string {
@@ -40,7 +51,7 @@ class SoundUtil {
 			};
 		}
 
-		return { valid: true };
+		return { valid: true, ext };
 	}
 
 	public getExtension(
@@ -64,17 +75,53 @@ class SoundUtil {
 		return contentType ? map[contentType.toLowerCase()] : undefined;
 	}
 
+	public async saveSoundFile(
+		guildId: string,
+		soundId: string,
+		attachment: { url: string; filename?: string; contentType?: string },
+	): Promise<{ filename: string }> {
+		await this.ensureSoundDir(guildId);
+
+		const ext =
+			this.getExtension(attachment.filename, attachment.contentType) || ".mp3";
+		const filename = `${soundId}${ext}`;
+		const filepath = this.getSoundPath(guildId, filename);
+
+		const response = await fetch(attachment.url);
+		if (!response.ok) {
+			throw new Error(`Failed to download sound: ${response.statusText}`);
+		}
+
+		const arrayBuffer = await response.arrayBuffer();
+		await Deno.writeFile(filepath, new Uint8Array(arrayBuffer));
+
+		return { filename };
+	}
+
+	public async deleteSoundFile(
+		guildId: string,
+		filename: string,
+	): Promise<boolean> {
+		try {
+			const filepath = this.getSoundPath(guildId, filename);
+			await Deno.remove(filepath);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
 	public createSoundClip(
 		id: string,
 		name: string,
-		url: string,
+		filename: string,
 		uploadedBy: string,
 		fileSize: number,
 	): SoundClip {
 		return {
 			id,
 			name,
-			url,
+			filename,
 			uploadedBy,
 			uploadedAt: new Date(),
 			fileSize,

@@ -160,10 +160,16 @@ class Sound extends Command {
 
 			const soundId = soundUtil.generateSoundId();
 
+			const { filename } = await soundUtil.saveSoundFile(
+				guildId,
+				soundId,
+				attachment,
+			);
+
 			const soundClip = soundUtil.createSoundClip(
 				soundId,
 				name,
-				attachment.url,
+				filename,
 				interaction.user.id,
 				attachment.size,
 			);
@@ -256,6 +262,7 @@ class Sound extends Command {
 				return;
 			}
 
+			await soundUtil.deleteSoundFile(guildId, sound.filename);
 			await dbManager.deleteSound(guildId, soundId);
 
 			logger.info("Sound deleted", {
@@ -357,7 +364,7 @@ class Sound extends Command {
 				return;
 			}
 
-			const success = await playSound(guildId, voiceChannelId, sound.url);
+			const success = await playSound(guildId, voiceChannelId, sound.filename);
 
 			if (success) {
 				logger.info("Playing sound", {
