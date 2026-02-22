@@ -112,6 +112,13 @@ class Sound extends Command {
 			return;
 		}
 
+		console.log("Attachment received:", {
+			filename: attachment.filename,
+			size: attachment.size,
+			url: attachment.url,
+			contentType: attachment.contentType,
+		});
+
 		const validation = soundUtil.isValidSoundFile(
 			attachment.filename,
 			attachment.size,
