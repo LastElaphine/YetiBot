@@ -4,9 +4,11 @@ import {
 	SlashCommandBuilder,
 } from "discord";
 import { Command } from "../../command.ts";
+import type { SoundClip } from "../../types/database.ts";
 import { DatabaseManager } from "../../utils/database-manager.ts";
 import { logger } from "../../utils/logger.ts";
 import { soundUtil } from "../../utils/sound-util.ts";
+import { playSound } from "../../utils/voice-handler.ts";
 
 const MAX_SOUNDS_PER_GUILD = 50;
 
@@ -59,6 +61,17 @@ class Sound extends Command {
 							.setDescription("Sound ID to set as default")
 							.setRequired(true),
 					),
+			)
+			.addSubcommand((subcommand) =>
+				subcommand
+					.setName("play")
+					.setDescription("Play a sound clip in your voice channel")
+					.addStringOption((option) =>
+						option
+							.setName("id")
+							.setDescription("Sound ID to play (or empty for default)")
+							.setRequired(false),
+					),
 			);
 	}
 
@@ -93,6 +106,9 @@ class Sound extends Command {
 				break;
 			case "set-default":
 				await this.handleSetDefault(interaction, guildId);
+				break;
+			case "play":
+				await this.handlePlay(interaction, guildId);
 				break;
 		}
 	}
@@ -296,6 +312,67 @@ class Sound extends Command {
 		} catch (error) {
 			console.error("Error setting default sound:", error);
 			await interaction.editReply("Failed to set default sound.");
+		}
+	}
+
+	private async handlePlay(
+		interaction: CommandInteraction,
+		guildId: string,
+	): Promise<void> {
+		const soundId = interaction.options.getString("id");
+
+		const member = interaction.member;
+		if (!member || !("voice" in member) || !member.voice?.channelId) {
+			await interaction.reply({
+				content: "You must be in a voice channel to play a sound.",
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
+		const voiceChannelId = member.voice.channelId;
+
+		await interaction.deferReply();
+
+		try {
+			const dbManager = DatabaseManager.getExistingInstance();
+			if (!dbManager) {
+				await interaction.editReply("Database not initialized.");
+				return;
+			}
+
+			let sound: SoundClip | null = null;
+			if (soundId) {
+				sound = await dbManager.getSound(guildId, soundId);
+			} else {
+				sound = await dbManager.getDefaultSound(guildId);
+			}
+
+			if (!sound) {
+				await interaction.editReply(
+					soundId
+						? "Sound not found."
+						: "No default sound set. Use `/sound set-default` first.",
+				);
+				return;
+			}
+
+			const success = await playSound(guildId, voiceChannelId, sound.url);
+
+			if (success) {
+				logger.info("Playing sound", {
+					command: "sound play",
+					guildId,
+					soundId: sound.id,
+					channelId: voiceChannelId,
+				});
+				await interaction.editReply(`🔊 Playing "${sound.name}"...`);
+			} else {
+				await interaction.editReply("Failed to play sound.");
+			}
+		} catch (error) {
+			console.error("Error playing sound:", error);
+			await interaction.editReply("Failed to play sound.");
 		}
 	}
 }

@@ -5,14 +5,19 @@ import { initializeAmuletUtil } from "./utils/amulet-util.ts";
 import { ChannelHelper } from "./utils/channel-helper.ts";
 import { DatabaseManager } from "./utils/database-manager.ts";
 import { logger } from "./utils/logger.ts";
+import { initializeVoiceHandler } from "./utils/voice-handler.ts";
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+});
 
 ChannelHelper.getInstance(client);
 const dbManager = DatabaseManager.getInstance(client);
 await dbManager.initialize();
 
 await initializeAmuletUtil(client);
+
+await initializeVoiceHandler(client);
 
 const commands = await loadCommands();
 logger.info("Commands loaded", {
