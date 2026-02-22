@@ -5,6 +5,7 @@ import type {
 	GuildDatabase,
 	GuildGameState,
 	LeaderboardEntry,
+	SoundClip,
 	StatsSnapshot,
 	UserProfile,
 } from "../types/database.ts";
@@ -35,11 +36,18 @@ class DatabaseManager {
 		};
 	}
 
-	public static getInstance(client: Client): DatabaseManager {
+	public static getInstance(client?: Client): DatabaseManager {
 		if (!DatabaseManager.instance) {
+			if (!client) {
+				throw new Error("Client required for first initialization");
+			}
 			DatabaseManager.instance = new DatabaseManager(client);
 		}
 		return DatabaseManager.instance;
+	}
+
+	public static getExistingInstance(): DatabaseManager | null {
+		return DatabaseManager.instance || null;
 	}
 
 	async initialize(): Promise<void> {
@@ -94,6 +102,10 @@ class DatabaseManager {
 				"amulet-time": new Map(),
 				"amulet-count": new Map(),
 				"games-played": new Map(),
+			},
+			sounds: {
+				sounds: new Map(),
+				defaultSoundId: null,
 			},
 			metadata: {
 				createdAt: new Date(),
@@ -279,6 +291,80 @@ class DatabaseManager {
 				rank: index + 1,
 			});
 		});
+	}
+
+	// Sound operations
+	async addSound(guildId: string, sound: SoundClip): Promise<void> {
+		const guildData = await this.getGuildData(guildId);
+		if (!guildData) {
+			throw new Error(`Guild ${guildId} not found`);
+		}
+
+		if (!guildData.sounds) {
+			guildData.sounds = { sounds: new Map(), defaultSoundId: null };
+		}
+
+		guildData.sounds.sounds.set(sound.id, sound);
+		this.db.data.globalMetadata.updatedAt = new Date();
+		await this.safeWrite();
+	}
+
+	async getSounds(guildId: string): Promise<SoundClip[]> {
+		const guildData = await this.getGuildData(guildId);
+		if (!guildData || !guildData.sounds) {
+			return [];
+		}
+		return Array.from(guildData.sounds.sounds.values());
+	}
+
+	async getSound(guildId: string, soundId: string): Promise<SoundClip | null> {
+		const guildData = await this.getGuildData(guildId);
+		if (!guildData || !guildData.sounds) {
+			return null;
+		}
+		return guildData.sounds.sounds.get(soundId) || null;
+	}
+
+	async deleteSound(guildId: string, soundId: string): Promise<boolean> {
+		const guildData = await this.getGuildData(guildId);
+		if (!guildData || !guildData.sounds) {
+			return false;
+		}
+
+		const deleted = guildData.sounds.sounds.delete(soundId);
+		if (deleted) {
+			if (guildData.sounds.defaultSoundId === soundId) {
+				guildData.sounds.defaultSoundId = null;
+			}
+			this.db.data.globalMetadata.updatedAt = new Date();
+			await this.safeWrite();
+		}
+		return deleted;
+	}
+
+	async setDefaultSound(guildId: string, soundId: string): Promise<boolean> {
+		const guildData = await this.getGuildData(guildId);
+		if (!guildData || !guildData.sounds) {
+			return false;
+		}
+
+		const sound = guildData.sounds.sounds.get(soundId);
+		if (!sound) {
+			return false;
+		}
+
+		guildData.sounds.defaultSoundId = soundId;
+		this.db.data.globalMetadata.updatedAt = new Date();
+		await this.safeWrite();
+		return true;
+	}
+
+	async getDefaultSound(guildId: string): Promise<SoundClip | null> {
+		const guildData = await this.getGuildData(guildId);
+		if (!guildData || !guildData.sounds || !guildData.sounds.defaultSoundId) {
+			return null;
+		}
+		return guildData.sounds.sounds.get(guildData.sounds.defaultSoundId) || null;
 	}
 
 	// Utility operations

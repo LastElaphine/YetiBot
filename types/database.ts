@@ -72,6 +72,21 @@ export interface LeaderboardEntry {
 	lastUpdated: Date;
 }
 
+export interface SoundClip {
+	id: string;
+	name: string;
+	filename: string;
+	uploadedBy: string;
+	uploadedAt: Date;
+	durationMs?: number;
+	fileSize: number;
+}
+
+export interface GuildSoundConfig {
+	sounds: Map<string, SoundClip>;
+	defaultSoundId: string | null;
+}
+
 export interface GuildDatabase {
 	guildId: string;
 	users: Map<string, UserProfile>; // Key: userId
@@ -79,6 +94,7 @@ export interface GuildDatabase {
 	leaderboards: {
 		[category: string]: Map<string, LeaderboardEntry>; // Key: userId
 	};
+	sounds: GuildSoundConfig;
 	metadata: {
 		createdAt: Date;
 		lastActivity: Date;
