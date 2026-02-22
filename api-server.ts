@@ -1,6 +1,10 @@
 import express from "express";
 import { Low } from "lowdb";
-import type { DatabaseSchema, UserProfile } from "./types/database.js";
+import type {
+	DatabaseSchema,
+	SoundClip,
+	UserProfile,
+} from "./types/database.js";
 import { AtomicJSONFile } from "./utils/atomic-json-adapter.js";
 import { paths } from "./utils/path-config.js";
 
@@ -13,12 +17,23 @@ interface GuildUser {
 	gamesPlayed: number;
 }
 
+interface GuildSound {
+	id: string;
+	name: string;
+	filename: string;
+	uploadedBy: string;
+	uploadedAt: string;
+	fileSize: number;
+}
+
 interface Guild {
 	id: string;
 	name: string;
 	icon?: string;
 	totalUsers: number;
 	users: GuildUser[];
+	sounds: GuildSound[];
+	defaultSoundId: string | null;
 }
 
 const adapter = new AtomicJSONFile<DatabaseSchema>(paths.dbFile);
@@ -48,6 +63,8 @@ async function getGuilds(): Promise<Guild[]> {
 			(data as { metadata?: { totalUsers?: number } }).metadata?.totalUsers ??
 			0,
 		users: [],
+		sounds: [],
+		defaultSoundId: null,
 	}));
 }
 
@@ -59,6 +76,7 @@ async function getGuild(id: string): Promise<Guild | null> {
 	const data = guildData as {
 		metadata?: { totalUsers?: number };
 		users?: Map<string, UserProfile>;
+		sounds?: { sounds: Map<string, SoundClip>; defaultSoundId: string | null };
 	};
 
 	const users: GuildUser[] = Array.from(
@@ -74,11 +92,27 @@ async function getGuild(id: string): Promise<Guild | null> {
 		}))
 		.sort((a, b) => b.amuletHeldCount - a.amuletHeldCount);
 
+	const sounds: GuildSound[] = Array.from(
+		data.sounds?.sounds?.entries() ?? [],
+	).map(([soundId, sound]) => ({
+		id: soundId,
+		name: sound.name,
+		filename: sound.filename,
+		uploadedBy: sound.uploadedBy,
+		uploadedAt:
+			sound.uploadedAt instanceof Date
+				? sound.uploadedAt.toISOString()
+				: String(sound.uploadedAt),
+		fileSize: sound.fileSize,
+	}));
+
 	return {
 		id,
 		name: `Server ${id}`,
 		totalUsers: data.metadata?.totalUsers ?? 0,
 		users,
+		sounds,
+		defaultSoundId: data.sounds?.defaultSoundId ?? null,
 	};
 }
 
