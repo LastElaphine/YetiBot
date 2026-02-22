@@ -2,8 +2,8 @@ import {
 	type CommandInteraction,
 	GuildMember,
 	SlashCommandBuilder,
-} from "discord";
-import { Command } from "../../command.ts";
+} from "discord.js";
+import { Command } from "../../command.js";
 
 class User extends Command {
 	public override get data(): SlashCommandBuilder {

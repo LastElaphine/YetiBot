@@ -3,7 +3,7 @@ import {
 	type Channel,
 	type Client,
 	type User,
-} from "discord";
+} from "discord.js";
 
 export class ChannelHelper {
 	private static instance: ChannelHelper;

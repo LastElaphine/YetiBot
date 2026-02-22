@@ -1,14 +1,11 @@
 [tools]
-deno = "latest"
 node = "22"
 
 [tasks]
-dev = "deno run --allow-all --watch main.ts"
-"dev:web" = "cd web && deno run -A npm:vite"
-"build:web" = "cd web && deno run -A npm:vite build"
-"dev:api" = "deno run -A api-server.ts"
-"deploy-dev-commands" = "deno run --allow-all deploy-commands.ts"
-lint = "deno run -A npm:@biomejs/biome check"
-"lint-fix" = "deno run -A npm:@biomejs/biome check --write"
-test = "deno test --no-check --allow-all tests/"
-"test:watch" = "deno test --no-check --allow-all --watch tests/"
+dev = "npm run dev"
+"dev:web" = "cd web && npm run dev"
+"build:web" = "cd web && npm run build"
+"dev:api" = "npm run dev:api"
+deploy-dev-commands = "npm run deploy-commands"
+lint = "npm run lint"
+"lint-fix" = "npm run lint-fix"

@@ -6,17 +6,17 @@ import {
 	EmbedBuilder,
 	MessageFlags,
 	SlashCommandBuilder,
-} from "discord";
-import { Command } from "../../command.ts";
-import { DatabaseManager } from "../../utils/database-manager.ts";
+} from "discord.js";
+import { Command } from "../../command.js";
+import { DatabaseManager } from "../../utils/database-manager.js";
 import {
 	CATEGORIES,
+	type LeaderboardCategory,
 	getCategoryConfig,
 	getNextCategory,
 	getPreviousCategory,
 	getRankEmoji,
-	type LeaderboardCategory,
-} from "../../utils/leaderboard-util.ts";
+} from "../../utils/leaderboard-util.js";
 
 const LEADERBOARD_LIMIT = 10;
 const BUTTON_TIMEOUT_MS = 120000;

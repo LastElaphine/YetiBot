@@ -1,5 +1,6 @@
-import { Low } from "npm:lowdb";
-import type { Client } from "discord";
+import { readFile, writeFile } from "node:fs/promises";
+import type { Client } from "discord.js";
+import { Low } from "lowdb";
 import type {
 	DatabaseSchema,
 	GuildDatabase,
@@ -8,9 +9,9 @@ import type {
 	SoundClip,
 	StatsSnapshot,
 	UserProfile,
-} from "../types/database.ts";
-import { AtomicJSONFile } from "./atomic-json-adapter.ts";
-import { ensureDirectories, paths } from "./path-config.ts";
+} from "../types/database.js";
+import { AtomicJSONFile } from "./atomic-json-adapter.js";
+import { ensureDirectories, paths } from "./path-config.js";
 
 class DatabaseManager {
 	private static instance: DatabaseManager;
@@ -386,8 +387,8 @@ class DatabaseManager {
 
 		await ensureDirectories();
 
-		const data = await Deno.readTextFile(paths.dbFile);
-		await Deno.writeTextFile(backupPath, data);
+		const data = await readFile(paths.dbFile, "utf-8");
+		await writeFile(backupPath, data);
 
 		if (this.db.data) {
 			this.db.data.globalMetadata.lastBackup = new Date();

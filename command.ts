@@ -4,7 +4,7 @@ import {
 	Collection,
 	type CommandInteraction,
 	type SlashCommandBuilder,
-} from "discord";
+} from "discord.js";
 
 export abstract class Command {
 	public abstract get data(): SlashCommandBuilder;

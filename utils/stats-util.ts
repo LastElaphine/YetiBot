@@ -1,6 +1,6 @@
-import type { Client } from "discord";
-import type { UserProfile } from "../types/database.ts";
-import { DatabaseManager } from "./database-manager.ts";
+import type { Client } from "discord.js";
+import type { UserProfile } from "../types/database.js";
+import { DatabaseManager } from "./database-manager.js";
 
 export interface UserRank {
 	category: string;

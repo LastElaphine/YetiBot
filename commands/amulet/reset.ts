@@ -1,6 +1,6 @@
-import { type CommandInteraction, SlashCommandBuilder } from "discord";
-import { Command } from "../../command.ts";
-import { amuletUtil } from "../../utils/amulet-util.ts";
+import { type CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../command.js";
+import { amuletUtil } from "../../utils/amulet-util.js";
 
 class Reset extends Command {
 	public override get data(): SlashCommandBuilder {

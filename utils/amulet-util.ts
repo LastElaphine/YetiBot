@@ -1,16 +1,17 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { clearTimeout, setTimeout } from "node:timers";
-import { resolve } from "@std/path";
-import type { Client, User } from "discord";
-import type { UserProfile } from "../types/database.ts";
-import { ChannelHelper } from "./channel-helper.ts";
-import { DatabaseManager } from "./database-manager.ts";
-import { logger } from "./logger.ts";
-import { messages } from "./messages.ts";
+import type { Client, User } from "discord.js";
+import type { UserProfile } from "../types/database.js";
+import { ChannelHelper } from "./channel-helper.js";
+import { DatabaseManager } from "./database-manager.js";
+import { logger } from "./logger.js";
+import { messages } from "./messages.js";
 
 const BEADS_EMOJI = "📿";
 const BEADS_ROLE_NAME = "📿";
 const MAX_HOLD_TIME_MS = 6 * 60 * 60 * 1000; // 6 hours
-const TAG_GIF_PATH = resolve(Deno.cwd(), "assets", "tag.gif");
+const TAG_GIF_PATH = resolve(process.cwd(), "assets", "tag.gif");
 
 class AmuletUtil {
 	private static instance: AmuletUtil;
@@ -155,7 +156,7 @@ class AmuletUtil {
 
 			// Try to send with GIF if it exists
 			try {
-				const gifData = await Deno.readFile(TAG_GIF_PATH);
+				const gifData = await readFile(TAG_GIF_PATH);
 				await ChannelHelper.getInstance(
 					this.client,
 				).sendToChannelWithAttachment(channelId, message, gifData, "tag.gif");
@@ -205,7 +206,7 @@ class AmuletUtil {
 
 			// Try to send with GIF if it exists
 			try {
-				const gifData = await Deno.readFile(TAG_GIF_PATH);
+				const gifData = await readFile(TAG_GIF_PATH);
 				await ChannelHelper.getInstance(
 					this.client,
 				).sendToChannelWithAttachment(

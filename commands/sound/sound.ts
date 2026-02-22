@@ -2,13 +2,13 @@ import {
 	type CommandInteraction,
 	MessageFlags,
 	SlashCommandBuilder,
-} from "discord";
-import { Command } from "../../command.ts";
-import type { SoundClip } from "../../types/database.ts";
-import { DatabaseManager } from "../../utils/database-manager.ts";
-import { logger } from "../../utils/logger.ts";
-import { soundUtil } from "../../utils/sound-util.ts";
-import { playSound } from "../../utils/voice-handler.ts";
+} from "discord.js";
+import { Command } from "../../command.js";
+import type { SoundClip } from "../../types/database.js";
+import { DatabaseManager } from "../../utils/database-manager.js";
+import { logger } from "../../utils/logger.js";
+import { soundUtil } from "../../utils/sound-util.js";
+import { playSound } from "../../utils/voice-handler.js";
 
 const MAX_SOUNDS_PER_GUILD = 50;
 

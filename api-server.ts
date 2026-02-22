@@ -1,7 +1,8 @@
-import { Low } from "npm:lowdb";
-import type { DatabaseSchema, UserProfile } from "./types/database.ts";
-import { AtomicJSONFile } from "./utils/atomic-json-adapter.ts";
-import { paths } from "./utils/path-config.ts";
+import express from "express";
+import { Low } from "lowdb";
+import type { DatabaseSchema, UserProfile } from "./types/database.js";
+import { AtomicJSONFile } from "./utils/atomic-json-adapter.js";
+import { paths } from "./utils/path-config.js";
 
 interface GuildUser {
 	id: string;
@@ -31,6 +32,9 @@ const db = new Low(adapter, {
 		updatedAt: new Date(),
 	},
 });
+
+const app = express();
+app.use(express.json());
 
 async function getGuilds(): Promise<Guild[]> {
 	await db.read();
@@ -78,37 +82,20 @@ async function getGuild(id: string): Promise<Guild | null> {
 	};
 }
 
-const _server = Deno.serve({ port: 3000 }, async (req) => {
-	const start = Date.now();
-	const url = new URL(req.url);
-
-	try {
-		if (url.pathname === "/api/guilds") {
-			const guilds = await getGuilds();
-			return new Response(JSON.stringify({ guilds }), {
-				headers: { "Content-Type": "application/json" },
-			});
-		}
-
-		const guildMatch = url.pathname.match(/^\/api\/guilds\/([^/]+)$/);
-		if (guildMatch) {
-			const guild = await getGuild(guildMatch[1]);
-			if (!guild) {
-				return new Response(JSON.stringify({ guild: null }), {
-					status: 404,
-					headers: { "Content-Type": "application/json" },
-				});
-			}
-			return new Response(JSON.stringify({ guild }), {
-				headers: { "Content-Type": "application/json" },
-			});
-		}
-
-		return new Response("Not Found", { status: 404 });
-	} finally {
-		const duration = Date.now() - start;
-		console.log(`${req.method} ${url.pathname} - ${duration}ms`);
-	}
+app.get("/api/guilds", async (_req, res) => {
+	const guilds = await getGuilds();
+	res.json({ guilds });
 });
 
-console.log("API server running on http://localhost:3000");
+app.get("/api/guilds/:id", async (req, res) => {
+	const guild = await getGuild(req.params.id);
+	if (!guild) {
+		res.status(404).json({ guild: null });
+		return;
+	}
+	res.json({ guild });
+});
+
+app.listen(3000, () => {
+	console.log("API server running on http://localhost:3000");
+});

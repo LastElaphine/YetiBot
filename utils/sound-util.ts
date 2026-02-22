@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { resolve } from "@std/path";
-import type { SoundClip } from "../types/database.ts";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import type { SoundClip } from "../types/database.js";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_EXTENSIONS = [".mp3", ".wav", ".ogg", ".flac", ".m4a"];
 
-const SOUNDS_DIR = resolve(Deno.cwd(), "data", "sounds");
+const SOUNDS_DIR = resolve(process.cwd(), "data", "sounds");
 
 class SoundUtil {
 	private static instance: SoundUtil;
@@ -20,7 +21,7 @@ class SoundUtil {
 	}
 
 	public async ensureSoundDir(guildId: string): Promise<void> {
-		await Deno.mkdir(resolve(SOUNDS_DIR, guildId), { recursive: true });
+		await mkdir(resolve(SOUNDS_DIR, guildId), { recursive: true });
 	}
 
 	public getSoundPath(guildId: string, filename: string): string {
@@ -93,7 +94,7 @@ class SoundUtil {
 		}
 
 		const arrayBuffer = await response.arrayBuffer();
-		await Deno.writeFile(filepath, new Uint8Array(arrayBuffer));
+		await writeFile(filepath, new Uint8Array(arrayBuffer));
 
 		return { filename };
 	}
@@ -104,7 +105,7 @@ class SoundUtil {
 	): Promise<boolean> {
 		try {
 			const filepath = this.getSoundPath(guildId, filename);
-			await Deno.remove(filepath);
+			await rm(filepath);
 			return true;
 		} catch {
 			return false;

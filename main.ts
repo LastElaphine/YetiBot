@@ -1,11 +1,11 @@
-import { Client, Events, GatewayIntentBits, MessageFlags } from "discord";
-import { type Command, loadCommands } from "./command.ts";
-import config from "./config.json" with { type: "json" };
-import { initializeAmuletUtil } from "./utils/amulet-util.ts";
-import { ChannelHelper } from "./utils/channel-helper.ts";
-import { DatabaseManager } from "./utils/database-manager.ts";
-import { logger } from "./utils/logger.ts";
-import { initializeVoiceHandler } from "./utils/voice-handler.ts";
+import { Client, Events, GatewayIntentBits, MessageFlags } from "discord.js";
+import { type Command, loadCommands } from "./command.js";
+import config from "./config.json" assert { type: "json" };
+import { initializeAmuletUtil } from "./utils/amulet-util.js";
+import { ChannelHelper } from "./utils/channel-helper.js";
+import { DatabaseManager } from "./utils/database-manager.js";
+import { logger } from "./utils/logger.js";
+import { initializeVoiceHandler } from "./utils/voice-handler.js";
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],

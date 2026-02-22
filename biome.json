@@ -6,7 +6,8 @@
 		"useIgnoreFile": false
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": true,
+		"ignore": ["data/", "web/.vite/", "web/node_modules/", "web/dist/"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -19,18 +20,13 @@
 			"recommended": true
 		}
 	},
+	"organizeImports": {
+		"enabled": true
+	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double",
 			"trailingCommas": "all"
-		}
-	},
-	"assist": {
-		"enabled": true,
-		"actions": {
-			"source": {
-				"organizeImports": "on"
-			}
 		}
 	}
 }

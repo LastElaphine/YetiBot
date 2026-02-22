@@ -1,4 +1,4 @@
-import type { UserProfile } from "../types/database.ts";
+import type { UserProfile } from "../types/database.js";
 
 export type LeaderboardCategory = "time" | "count" | "passes" | "longest";
 

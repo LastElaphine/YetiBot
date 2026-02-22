@@ -2,10 +2,10 @@ import {
 	type CommandInteraction,
 	MessageFlags,
 	SlashCommandBuilder,
-} from "discord";
-import { Command } from "../../command.ts";
-import { amuletUtil } from "../../utils/amulet-util.ts";
-import { logger } from "../../utils/logger.ts";
+} from "discord.js";
+import { Command } from "../../command.js";
+import { amuletUtil } from "../../utils/amulet-util.js";
+import { logger } from "../../utils/logger.js";
 
 class Give extends Command {
 	public override get data(): SlashCommandBuilder {

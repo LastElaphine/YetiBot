@@ -1,5 +1,5 @@
-import { REST, Routes } from "discord";
-import { type Command, loadCommands } from "./command.ts";
+import { REST, Routes } from "discord.js";
+import { type Command, loadCommands } from "./command.js";
 import config from "./config.json" with { type: "json" };
 
 const commands = await loadCommands();

@@ -1,5 +1,5 @@
-import { type CommandInteraction, SlashCommandBuilder } from "discord";
-import { Command } from "../../command.ts";
+import { type CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../command.js";
 
 class Ping extends Command {
 	public override get data(): SlashCommandBuilder {

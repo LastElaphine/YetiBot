@@ -1,14 +1,14 @@
 import {
 	AudioPlayerStatus,
+	type VoiceConnection,
 	createAudioPlayer,
 	createAudioResource,
 	joinVoiceChannel,
-	type VoiceConnection,
 } from "@discordjs/voice";
-import { type Client, Events, type VoiceState } from "discord";
-import { DatabaseManager } from "./database-manager.ts";
-import { logger } from "./logger.ts";
-import { soundUtil } from "./sound-util.ts";
+import { type Client, Events, type VoiceState } from "discord.js";
+import { DatabaseManager } from "./database-manager.js";
+import { logger } from "./logger.js";
+import { soundUtil } from "./sound-util.js";
 
 class VoiceHandler {
 	private static instance: VoiceHandler;
