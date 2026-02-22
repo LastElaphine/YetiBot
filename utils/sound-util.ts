@@ -1,7 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { resolve } from "node:path";
 import type { SoundClip } from "../types/database.ts";
-import { paths } from "./path-config.ts";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_EXTENSIONS = [".mp3", ".wav", ".ogg", ".flac", ".m4a"];
@@ -24,21 +22,9 @@ class SoundUtil {
 
 	public isValidSoundFile(
 		filename: string | undefined,
+		contentType: string | undefined,
 		fileSize: number,
 	): { valid: boolean; error?: string } {
-		if (!filename || typeof filename !== "string") {
-			return { valid: false, error: "Invalid filename" };
-		}
-
-		const ext = filename.toLowerCase().slice(filename.lastIndexOf("."));
-
-		if (!ALLOWED_EXTENSIONS.includes(ext)) {
-			return {
-				valid: false,
-				error: `Invalid file type. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}`,
-			};
-		}
-
 		if (fileSize > MAX_FILE_SIZE) {
 			return {
 				valid: false,
@@ -46,73 +32,49 @@ class SoundUtil {
 			};
 		}
 
+		const ext = this.getExtension(filename, contentType);
+		if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
+			return {
+				valid: false,
+				error: `Invalid file type. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}`,
+			};
+		}
+
 		return { valid: true };
 	}
 
-	public getSoundPath(guildId: string, filename: string): string {
-		return resolve(paths.soundsDir, guildId, filename);
-	}
-
-	public getSoundDir(guildId: string): string {
-		return resolve(paths.soundsDir, guildId);
-	}
-
-	public async saveSoundFile(
-		guildId: string,
-		soundId: string,
-		attachment: { url: string; filename: string },
-	): Promise<{ path: string; filename: string }> {
-		const soundDir = this.getSoundDir(guildId);
-		await Deno.mkdir(soundDir, { recursive: true });
-
-		const ext = attachment.filename.slice(attachment.filename.lastIndexOf("."));
-		const newFilename = `${soundId}${ext}`;
-		const soundPath = this.getSoundPath(guildId, newFilename);
-
-		const response = await fetch(attachment.url);
-		if (!response.ok) {
-			throw new Error(`Failed to download sound file: ${response.statusText}`);
+	public getExtension(
+		filename?: string,
+		contentType?: string,
+	): string | undefined {
+		if (filename?.includes(".")) {
+			return filename.toLowerCase().slice(filename.lastIndexOf("."));
 		}
 
-		const arrayBuffer = await response.arrayBuffer();
-		await Deno.writeFile(soundPath, new Uint8Array(arrayBuffer));
-
-		return { path: soundPath, filename: newFilename };
-	}
-
-	public async deleteSoundFile(
-		guildId: string,
-		filename: string,
-	): Promise<boolean> {
-		try {
-			const soundPath = this.getSoundPath(guildId, filename);
-			await Deno.remove(soundPath);
-			return true;
-		} catch {
-			return false;
-		}
-	}
-
-	public async fileExists(path: string): Promise<boolean> {
-		try {
-			await Deno.stat(path);
-			return true;
-		} catch {
-			return false;
-		}
+		const map: Record<string, string> = {
+			"audio/mpeg": ".mp3",
+			"audio/wav": ".wav",
+			"audio/wave": ".wav",
+			"audio/x-wav": ".wav",
+			"audio/ogg": ".ogg",
+			"audio/flac": ".flac",
+			"audio/mp4": ".m4a",
+			"audio/x-m4a": ".m4a",
+		};
+		return contentType ? map[contentType.toLowerCase()] : undefined;
 	}
 
 	public createSoundClip(
 		id: string,
 		name: string,
-		filename: string,
+		url: string,
 		uploadedBy: string,
 		fileSize: number,
 	): SoundClip {
 		return {
 			id,
 			name,
-			filename,
+			url,
 			uploadedBy,
 			uploadedAt: new Date(),
 			fileSize,

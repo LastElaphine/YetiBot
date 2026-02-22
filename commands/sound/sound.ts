@@ -112,15 +112,9 @@ class Sound extends Command {
 			return;
 		}
 
-		console.log("Attachment received:", {
-			filename: attachment.filename,
-			size: attachment.size,
-			url: attachment.url,
-			contentType: attachment.contentType,
-		});
-
 		const validation = soundUtil.isValidSoundFile(
 			attachment.filename,
+			attachment.contentType,
 			attachment.size,
 		);
 		if (!validation.valid) {
@@ -149,16 +143,11 @@ class Sound extends Command {
 			}
 
 			const soundId = soundUtil.generateSoundId();
-			const { filename } = await soundUtil.saveSoundFile(
-				guildId,
-				soundId,
-				attachment,
-			);
 
 			const soundClip = soundUtil.createSoundClip(
 				soundId,
 				name,
-				filename,
+				attachment.url,
 				interaction.user.id,
 				attachment.size,
 			);
@@ -249,15 +238,6 @@ class Sound extends Command {
 			if (!sound) {
 				await interaction.editReply("Sound not found.");
 				return;
-			}
-
-			const deleted = await soundUtil.deleteSoundFile(guildId, sound.filename);
-			if (!deleted) {
-				logger.warn("Sound file not found on disk, proceeding with DB delete", {
-					command: "sound delete",
-					guildId,
-					soundId,
-				});
 			}
 
 			await dbManager.deleteSound(guildId, soundId);

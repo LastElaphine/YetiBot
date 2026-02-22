@@ -75,7 +75,7 @@ export interface LeaderboardEntry {
 export interface SoundClip {
 	id: string;
 	name: string;
-	filename: string;
+	url: string;
 	uploadedBy: string;
 	uploadedAt: Date;
 	durationMs?: number;
