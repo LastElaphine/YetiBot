@@ -130,6 +130,28 @@ app.get("/api/guilds/:id", async (req, res) => {
 	res.json({ guild });
 });
 
+app.get("/api/guilds/:guildId/sounds/:soundId/play", async (req, res) => {
+	const { guildId, soundId } = req.params;
+	const soundPath = `data/sounds/${guildId}`;
+	const fs = await import("node:fs");
+
+	const files = fs.readdirSync(soundPath);
+	const soundFile = files.find((f) => f.startsWith(soundId));
+
+	if (!soundFile) {
+		res.status(404).json({ error: "Sound file not found" });
+		return;
+	}
+
+	const filePath = `${soundPath}/${soundFile}`;
+	const stat = fs.statSync(filePath);
+	const fileStream = fs.createReadStream(filePath);
+
+	res.setHeader("Content-Type", "audio/mpeg");
+	res.setHeader("Content-Length", stat.size);
+	fileStream.pipe(res);
+});
+
 app.listen(3000, () => {
 	console.log("API server running on http://localhost:3000");
 });

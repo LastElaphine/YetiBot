@@ -47,6 +47,20 @@ export default function GuildDetail() {
 	const { id } = useParams<{ id: string }>();
 	const [guild, setGuild] = useState<GuildData | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [playingSoundId, setPlayingSoundId] = useState<string | null>(null);
+
+	const playSound = (soundId: string) => {
+		if (playingSoundId === soundId) {
+			setPlayingSoundId(null);
+			return;
+		}
+		setPlayingSoundId(soundId);
+		const audio = new Audio(
+			`http://localhost:3000/api/guilds/${id}/sounds/${soundId}/play`,
+		);
+		audio.play();
+		audio.onended = () => setPlayingSoundId(null);
+	};
 
 	useEffect(() => {
 		fetch(`http://localhost:3000/api/guilds/${id}`)
@@ -152,6 +166,7 @@ export default function GuildDetail() {
 								<th>Uploaded By</th>
 								<th>Size</th>
 								<th>Default</th>
+								<th>Play</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -169,6 +184,19 @@ export default function GuildDetail() {
 										) : (
 											"-"
 										)}
+									</td>
+									<td>
+										<button
+											type="button"
+											className={`btn btn-sm ${
+												playingSoundId === sound.id
+													? "btn-danger"
+													: "btn-primary"
+											}`}
+											onClick={() => playSound(sound.id)}
+										>
+											{playingSoundId === sound.id ? "Stop" : "Play"}
+										</button>
 									</td>
 								</tr>
 							))}
