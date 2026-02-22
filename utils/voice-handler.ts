@@ -141,7 +141,7 @@ class VoiceHandler {
 	}
 }
 
-const voiceHandlerInstance: VoiceHandler | null = null;
+let voiceHandlerInstance: VoiceHandler | null = null;
 
 export async function initializeVoiceHandler(client: Client): Promise<void> {
 	await VoiceHandler.initialize(client);
