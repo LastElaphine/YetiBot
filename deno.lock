@@ -10,7 +10,7 @@
     "jsr:@std/path@1": "1.1.2",
     "npm:@biomejs/biome@*": "2.2.4",
     "npm:@biomejs/biome@^2.2.4": "2.2.4",
-    "npm:@discordjs/voice@0.11.0": "0.11.0",
+    "npm:@discordjs/voice@0.9.0": "0.9.0",
     "npm:@types/node@*": "24.2.0",
     "npm:discord.js@14.22.1": "14.22.1",
     "npm:discord.js@^14.22.1": "14.22.1",
@@ -154,12 +154,13 @@
     "@discordjs/util@1.1.1": {
       "integrity": "sha512-eddz6UnOBEB1oITPinyrB2Pttej49M9FZQY8NxgEvc3tq6ZICZ19m70RsmzRdDHk80O9NoYN/25AqJl8vPVf/g=="
     },
-    "@discordjs/voice@0.11.0": {
-      "integrity": "sha512-6+9cj1dxzBJm7WJ9qyG2XZZQ8rcLl6x2caW0C0OxuTtMLAaEDntpb6lqMTFiBg/rDc4Rd59g1w0gJmib33CuHw==",
+    "@discordjs/voice@0.9.0": {
+      "integrity": "sha512-fSAYtPCEfIyG56hC2cRJuyfvQGr+aawSssLCqYg70vZ51dKO4spEKOB8V6vNMP5HnEplbhmxkB3YbshFKtnCQQ==",
       "dependencies": [
         "@types/ws",
-        "discord-api-types@0.36.3",
+        "discord-api-types@0.29.0",
         "prism-media",
+        "tiny-typed-emitter",
         "tslib",
         "ws"
       ],
@@ -207,8 +208,8 @@
     "@vladfrangu/async_event_emitter@2.4.6": {
       "integrity": "sha512-RaI5qZo6D2CVS6sTHFKg1v5Ohq/+Bo2LZ5gzUEwZ/WkHhwtGTCB/sVLw8ijOkAUxasZ+WshN/Rzj4ywsABJ5ZA=="
     },
-    "discord-api-types@0.36.3": {
-      "integrity": "sha512-bz/NDyG0KBo/tY14vSkrwQ/n3HKPf87a0WFW/1M9+tXYK+vp5Z5EksawfCWo2zkAc6o7CClc0eff1Pjrqznlwg=="
+    "discord-api-types@0.29.0": {
+      "integrity": "sha512-Ekq1ICNpOTVajXKZguNFrsDeTmam+ZeA38txsNLZnANdXUjU6QBPIZLUQTC6MzigFGb0Tt8vk4xLnXmzv0shNg=="
     },
     "discord-api-types@0.38.26": {
       "integrity": "sha512-xpmPviHjIJ6dFu1eNwNDIGQ3N6qmPUUYFVAx/YZ64h7ZgPkTcKjnciD8bZe8Vbeji7yS5uYljyciunpq0J5NSw=="
@@ -255,6 +256,9 @@
     "steno@4.0.2": {
       "integrity": "sha512-yhPIQXjrlt1xv7dyPQg2P17URmXbuM5pdGkpiMB3RenprfiBlvK415Lctfe0eshk90oA7/tNq7WEiMK8RSP39A=="
     },
+    "tiny-typed-emitter@2.1.0": {
+      "integrity": "sha512-qVtvMxeXbVej0cQWKqVSSAHmKZEHAvxdF8HEUBFWts8h+xEo5m/lEiPakuyZ3BnCBjOD8i24kzNOiOLLgsSxhA=="
+    },
     "ts-mixer@6.0.4": {
       "integrity": "sha512-ufKpbmrugz5Aou4wcr5Wc1UUFWOLhq+Fm6qa6P0w0K5Qw2yhaUoiWszhCVuNQyNwrlGiscHOmqYoAox1PtvgjA=="
     },
@@ -280,7 +284,7 @@
       "jsr:@std/log@0.224",
       "jsr:@std/path@1",
       "npm:@biomejs/biome@^2.2.4",
-      "npm:@discordjs/voice@0.11.0",
+      "npm:@discordjs/voice@0.9.0",
       "npm:discord.js@^14.22.1",
       "npm:lowdb@^7.0.1",
       "npm:zod@^3.24.1"
