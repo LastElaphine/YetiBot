@@ -13,7 +13,6 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - OTEL_DENO=true
       - OTEL_SERVICE_NAME=yetibot
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
@@ -27,12 +26,11 @@ services:
       - ./config.json:/app/config.json:ro
       - ./data:/app/data
       - .:/app
-    command: ["deno", "run", "--allow-all", "--watch", "main.ts"]
+    command: ["pnpm", "run", "dev"]
     stdin_open: true
     tty: true
     restart: on-failure
     environment:
-      - OTEL_DENO=true
       - OTEL_SERVICE_NAME=yetibot-dev
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 

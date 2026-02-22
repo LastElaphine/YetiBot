@@ -19,28 +19,25 @@ All commands run from the project root. This project uses **mise** for tool mana
 ### Development
 
 ```bash
-mise run dev              # Run bot with hot reload (--watch)
-mise run deploy-commands  # Deploy slash commands to test server
-mise exec -- deno run --allow-all main.ts
+npm run dev              # Run bot with hot reload
+npm run deploy-commands  # Deploy slash commands to test server
+npm start                # Run bot without hot reload
 ```
 
 ### Linting & Formatting
 
 ```bash
-mise run lint             # Run Biome check (lint + imports + formatting)
-mise run lint-fix         # Run Biome check and auto-fix issues
-mise exec -- deno run -A npm:@biomejs/biome check <path>    # Lint file
-mise exec -- deno run -A npm:@biomejs/biome check --write <path>  # Fix file
+npm run lint             # Run Biome check (lint + imports + formatting)
+npm run lint-fix         # Run Biome check and auto-fix issues
+npx @biomejs/biome check <path>    # Lint file
+npx @biomejs/biome check --write <path>  # Fix file
 ```
 
 ### Testing
 
 ```bash
-mise run test            # Run all tests
-mise run test:watch      # Run tests in watch mode
+npm test            # Run all tests
 ```
-
-> **Note**: Tests run with `--no-check` to skip TypeScript type checking (use `mise run lint` for type checking).
 
 Tests are located in `tests/` directory:
 - `tests/fixtures/` - Mock objects and test data
@@ -48,12 +45,13 @@ Tests are located in `tests/` directory:
 
 #### Writing Tests
 
-Use Deno's built-in test runner with `@std/assert`:
+Use Node.js test runner with `@node:test` and `@node:assert`:
 
 ```typescript
-import { assertEquals, assertExists } from "@std/assert";
+import { assertEquals, assertExists } from "@node:assert";
+import { test } from "@node:test";
 
-Deno.test("Command name is correct", async () => {
+test("Command name is correct", async () => {
   const { command } = await import("./commands/utility/ping.ts");
   assertEquals(command.data.name, "ping");
 });
@@ -76,27 +74,20 @@ const interaction = createMockCommandInteraction({
 #### Running Specific Tests
 
 ```bash
-deno test --no-check --allow-all tests/commands/ping.test.ts
-deno test --no-check --allow-all tests/ -f "ping"
+node --test tests/commands/ping.test.ts
+node --test tests/ -f "ping"
 ```
-
-### Required Permissions
-
-- `--allow-all` for development (bot needs Guilds intent, config access)
-- `--allow-read` for command loading
-- `--allow-net` for Discord API communication
 
 ## Code Style Guidelines
 
 ### Imports
 
-- Use Deno native imports (`@std/*`, `jsr:*`) where possible
-- Use npm: prefix for Node.js packages
+- Use Node.js-style imports
 - Group: stdlib → external → relative
   ```typescript
   import { readdir } from "node:fs/promises";
   import { Collection, type CommandInteraction } from "discord";
-  import { Command } from "../../command.ts";
+  import { Command } from "../../command.js";
   ```
 
 ### Formatting (Biome)
@@ -105,7 +96,7 @@ deno test --no-check --allow-all tests/ -f "ping"
 - Double quotes for strings
 - Trailing commas in multi-line objects/arrays
 - Semicolons required
-- Run `mise run lint:fix` to auto-format
+- Run `npm run lint-fix` to auto-format
 
 ### Types
 
@@ -149,7 +140,8 @@ YetiBot/
 ├── tests/                   # Test files
 │   ├── fixtures/           # Mock objects and test data
 │   └── commands/           # Command unit tests
-├── deno.json                # Tasks, imports
+├── package.json             # Dependencies, scripts
+├── tsconfig.json            # TypeScript config
 ├── biome.json               # Linter/formatter config
 └── AGENTS.md                # This file
 ```
@@ -158,7 +150,7 @@ YetiBot/
 
 ```typescript
 import { type CommandInteraction, SlashCommandBuilder } from "discord";
-import { Command } from "../../command.ts";
+import { Command } from "../../command.js";
 
 class <Name> extends Command {
   public override get data(): SlashCommandBuilder {
@@ -191,7 +183,7 @@ export const command = new <Name>();
 
 ## Session Completion (MANDATORY)
 
-1. Run quality gates: `mise run lint`
+1. Run quality gates: `npm run lint`
 2. Update issue status: `bd close <id>`
 3. Sync and push:
    ```bash

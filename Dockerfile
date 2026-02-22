@@ -1,17 +1,19 @@
-FROM denoland/deno:2.0
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY deno.json deno.lock ./
+RUN npm install -g pnpm
 
-RUN deno cache main.ts
+COPY package.json package-lock.json ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["deno", "run", "--allow-all", "main.ts"]
+CMD ["pnpm", "run", "start"]
 
-ENV OTEL_DENO=true
+ENV NODE_ENV=production
 ENV OTEL_SERVICE_NAME=yetibot
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317

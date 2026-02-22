@@ -68,8 +68,8 @@ class Sound extends Command {
 					.setDescription("Play a sound clip in your voice channel")
 					.addStringOption((option) =>
 						option
-							.setName("id")
-							.setDescription("Sound ID to play")
+							.setName("sound")
+							.setDescription("Sound ID or name to play")
 							.setRequired(true),
 					),
 			);
@@ -326,7 +326,7 @@ class Sound extends Command {
 		interaction: CommandInteraction,
 		guildId: string,
 	): Promise<void> {
-		const soundId = interaction.options.getString("id");
+		const soundInput = interaction.options.getString("sound");
 
 		const member = interaction.member;
 		if (!member || !("voice" in member) || !member.voice?.channelId) {
@@ -349,15 +349,22 @@ class Sound extends Command {
 			}
 
 			let sound: SoundClip | null = null;
-			if (soundId) {
-				sound = await dbManager.getSound(guildId, soundId);
+			if (soundInput) {
+				sound = await dbManager.getSound(guildId, soundInput);
+				if (!sound) {
+					const sounds = await dbManager.getSounds(guildId);
+					const lowerInput = soundInput.toLowerCase();
+					sound =
+						sounds.find((s) => s.name.toLowerCase().includes(lowerInput)) ??
+						null;
+				}
 			} else {
 				sound = await dbManager.getDefaultSound(guildId);
 			}
 
 			if (!sound) {
 				await interaction.editReply(
-					soundId
+					soundInput
 						? "Sound not found."
 						: "No default sound set. Use `/sound set-default` first.",
 				);
